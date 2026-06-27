@@ -13,14 +13,21 @@ window.loadTeacherClasses = async () => {
     // Lưu danh sách lớp vào window để dễ dàng tìm kiếm ID theo tên khi cần xóa
     window.currentTeacherClasses = classes;
 
+    let freeStudents = [];
+    try {
+      freeStudents = await window.apiFetch("/api/students/free");
+    } catch (e) {
+      console.error("Lỗi tải danh sách học sinh tự do:", e);
+    }
+
     const grid = document.getElementById("class-cards-grid");
     grid.innerHTML = "";
 
-    if (classes.length === 0) {
+    if (classes.length === 0 && freeStudents.length === 0) {
       grid.innerHTML = `
         <div class="col-span-full bg-white border border-dashed rounded-2xl p-8 text-center text-slate-400">
           <i data-lucide="users" class="w-12 h-12 mx-auto text-slate-300 mb-2"></i>
-          Chưa có lớp học nào. Hãy bấm "Thêm lớp mới" để bắt đầu nhé cô!
+          Chưa có lớp học hay học sinh tự do nào. Hãy bấm "Thêm lớp mới" để bắt đầu nhé cô!
         </div>
       `;
       if (typeof lucide !== "undefined") lucide.createIcons();
@@ -51,6 +58,29 @@ window.loadTeacherClasses = async () => {
       `;
       grid.appendChild(card);
     });
+
+    // Thêm thẻ "Học sinh tự do / Chưa xếp lớp"
+    const freeCard = document.createElement("div");
+    freeCard.className =
+      "bg-slate-50 rounded-2xl border border-dashed border-slate-300 p-6 shadow-sm hover:shadow-md transition-all cursor-pointer hover:border-amber-400 relative overflow-hidden bg-gradient-to-br from-slate-50 to-amber-50/10";
+    freeCard.onclick = () => selectClass("Tự do");
+    freeCard.innerHTML = `
+      <div class="absolute -top-6 -right-6 w-20 h-20 bg-amber-100/30 rounded-full blur-xl"></div>
+      <div class="flex items-center gap-4">
+        <div class="p-3 bg-amber-50 text-amber-600 rounded-xl">
+          <i data-lucide="users" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <h4 class="font-extrabold text-slate-800 text-lg uppercase">Học sinh tự do</h4>
+          <p class="text-xs text-amber-600 font-bold">${freeStudents.length} học sinh chưa xếp lớp</p>
+        </div>
+      </div>
+      <div class="mt-4 pt-3 border-t border-slate-200/60 flex justify-between items-center text-xs text-slate-500 font-semibold">
+        <span>Kiểm soát & Phân lớp</span>
+        <i data-lucide="chevron-right" class="w-4 h-4 text-amber-500"></i>
+      </div>
+    `;
+    grid.appendChild(freeCard);
 
     if (typeof lucide !== "undefined") lucide.createIcons();
   } catch (err) {
@@ -119,27 +149,35 @@ document
 // Xem học sinh trong Lớp học cụ thể
 async function selectClass(className) {
   try {
-    const students = await window.apiFetch(
-      `/api/classes/${className}/students`,
-    );
-
-    document.getElementById("selected-class-title").textContent =
-      `Học sinh lớp ${className}`;
-    document.getElementById("selected-class-badge").textContent =
-      `${students.length} Học Sinh`;
+    let students = [];
+    if (className === "Tự do") {
+      students = await window.apiFetch("/api/students/free");
+      document.getElementById("selected-class-title").textContent = `Học sinh tự do (Chưa xếp lớp)`;
+      document.getElementById("selected-class-badge").textContent = `${students.length} Học Sinh`;
+    } else {
+      students = await window.apiFetch(
+        `/api/classes/${className}/students`,
+      );
+      document.getElementById("selected-class-title").textContent = `Học sinh lớp ${className}`;
+      document.getElementById("selected-class-badge").textContent = `${students.length} Học Sinh`;
+    }
 
     // Gán sự kiện xóa lớp cho nút delete-class-btn
     const deleteBtn = document.getElementById("delete-class-btn");
     if (deleteBtn) {
-      const currentClass = (window.currentTeacherClasses || []).find(
-        (c) => c.name === className,
-      );
-      if (currentClass) {
-        deleteBtn.style.display = "flex"; // Hiện nút xóa
-        deleteBtn.onclick = () =>
-          window.deleteClass(currentClass.id, className);
+      if (className === "Tự do") {
+        deleteBtn.style.display = "none";
       } else {
-        deleteBtn.style.display = "none"; // Ẩn nếu không tìm thấy thông tin lớp
+        const currentClass = (window.currentTeacherClasses || []).find(
+          (c) => c.name === className,
+        );
+        if (currentClass) {
+          deleteBtn.style.display = "flex"; // Hiện nút xóa
+          deleteBtn.onclick = () =>
+            window.deleteClass(currentClass.id, className);
+        } else {
+          deleteBtn.style.display = "none"; // Ẩn nếu không tìm thấy thông tin lớp
+        }
       }
     }
 
@@ -199,6 +237,8 @@ async function selectClass(className) {
     alert("Không thể xem danh sách học sinh: " + err.message);
   }
 }
+
+window.viewClassStudents = (className) => selectClass(className);
 
 window.resetStudentPassword = async (id, name, className) => {
   if (
@@ -887,6 +927,9 @@ window.openMoveStudentModal = async (
     if (selectNewClass) {
       selectNewClass.innerHTML = "";
 
+      // Thêm tùy chọn Tự do
+      selectNewClass.innerHTML += `<option value="">Học sinh Tự do (Không xếp lớp)</option>`;
+
       classes.forEach((c) => {
         const selected = c.name === currentClassName ? "selected" : "";
         selectNewClass.innerHTML += `<option value="${c.name}" ${selected}>Lớp ${c.name}</option>`;
@@ -940,7 +983,8 @@ if (moveStudentForm) {
       "move-student-current-class",
     ).value;
 
-    if (newClassName === currentClassName) {
+    const actualCurrentValue = (currentClassName === "Tự do") ? "" : currentClassName;
+    if (newClassName === actualCurrentValue) {
       alert("Học sinh đang ở lớp này rồi! Vui lòng chọn lớp học khác.");
       return;
     }
@@ -955,6 +999,8 @@ if (moveStudentForm) {
       window.closeMoveStudentModal();
       // Tải lại danh sách học sinh lớp cũ để cập nhật bảng
       selectClass(currentClassName);
+      // Tải lại các thẻ lớp để cập nhật số lượng
+      window.loadTeacherClasses();
     } catch (err) {
       alert("Lỗi khi chuyển lớp học sinh: " + err.message);
     }
