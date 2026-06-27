@@ -69,6 +69,7 @@ CREATE TABLE exams (
   difficulty VARCHAR(20),  -- basic/medium/hard/mixed
   is_ai_generated BOOLEAN DEFAULT FALSE,
   assigned_groups JSONB,
+  status VARCHAR(20) DEFAULT 'draft',
   created_by INT REFERENCES users(id),
   created_at TIMESTAMP DEFAULT NOW()
 );

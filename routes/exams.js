@@ -142,7 +142,7 @@ router.put('/exams/:id/status', requireAuth, requireTeacher, async (req, res) =>
     });
   } catch (error) {
     console.error('Lỗi khi cập nhật trạng thái đề thi:', error);
-    res.status(500).json({ error: 'Không thể cập nhật trạng thái đề thi.' });
+    res.status(500).json({ error: `Không thể cập nhật trạng thái đề thi: ${error.message}` });
   }
 });
 
@@ -388,9 +388,9 @@ router.post('/exam-results', requireAuth, async (req, res) => {
 
     questions.forEach(q => {
       const studentAns = answers[q.question_order];
-      const correctAns = q.correct_answer.toUpperCase().trim();
+      const correctAns = q.correct_answer ? String(q.correct_answer).toUpperCase().trim() : '';
       
-      if (studentAns && studentAns.toUpperCase().trim() === correctAns) {
+      if (studentAns && correctAns && String(studentAns).toUpperCase().trim() === correctAns) {
         totalCorrect++;
       }
     });
@@ -416,7 +416,7 @@ router.post('/exam-results', requireAuth, async (req, res) => {
 
   } catch (error) {
     console.error('Lỗi khi chấm điểm bài thi:', error);
-    res.status(500).json({ error: 'Không thể hoàn tất nộp bài thi.' });
+    res.status(500).json({ error: `Không thể hoàn tất nộp bài thi: ${error.message}` });
   }
 });
 

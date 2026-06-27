@@ -990,9 +990,14 @@
             <!-- Màn hình ĐANG LÀM BÀI THI -->
             <div id="s-exams-taking-screen" class="hidden space-y-6">
               <div class="bg-white border border-slate-200 p-4 sm:p-6 rounded-2xl shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4 sticky top-16 z-30">
-                <div>
-                  <h3 id="exam-taking-title" class="font-extrabold text-slate-900 text-lg">Đang thi...</h3>
-                  <p class="text-xs text-slate-400">Hãy chọn đáp án cẩn thận trước khi nộp bài nhé con.</p>
+                <div class="flex items-center gap-3">
+                  <button onclick="exitExam()" class="p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 rounded-lg transition-all" title="Thoát bài thi">
+                    <i data-lucide="arrow-left" class="w-5 h-5"></i>
+                  </button>
+                  <div>
+                    <h3 id="exam-taking-title" class="font-extrabold text-slate-900 text-lg">Đang thi...</h3>
+                    <p class="text-xs text-slate-400">Hãy chọn đáp án cẩn thận trước khi nộp bài nhé con.</p>
+                  </div>
                 </div>
                 
                 <!-- Đồng hồ đếm ngược -->

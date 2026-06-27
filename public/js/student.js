@@ -1033,6 +1033,15 @@ window.selectOption = (questionOrder, answer) => {
 };
 
 // Nộp bài thi
+window.exitExam = () => {
+  if (confirm('Con có chắc chắn muốn thoát khỏi bài thi? Quá trình làm bài sẽ không được lưu lại.')) {
+    clearInterval(window.studentState.examTimerInterval);
+    document.getElementById('s-exams-taking-screen').classList.add('hidden');
+    document.getElementById('s-exams-list-screen').classList.remove('hidden');
+    window.loadStudentExams();
+  }
+};
+
 window.submitExam = async () => {
   if (!confirm('Con có chắc chắn muốn nộp bài thi ngay không? Hãy kiểm tra lại các đáp án.')) return;
   
