@@ -21,7 +21,7 @@ const DB_FILE_PATH = path.join(process.cwd(), 'db', 'local_db.json');
 // Dữ liệu mẫu (Seed Data) dùng để khởi tạo cho môi trường local
 const INITIAL_SEED_DATA = {
   users: [
-    { id: 1, full_name: 'Cô Nguyễn Thị Hiền', email: 'teacher', password_hash: '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG', role: 'teacher', class_name: null, created_at: new Date() },
+    { id: 1, full_name: 'Ms. Hien', email: 'teacher', password_hash: '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG', role: 'teacher', class_name: null, created_at: new Date() },
     { id: 2, full_name: 'Nguyễn Văn An', email: 'hs1@10a1.com', password_hash: '$2b$10$6LYxQ2jqsQ04a.VBLgdCM.hM3rlE.ij3o1uhtmpFyGW/Wonrwxhee', role: 'student', class_name: '10A1', created_at: new Date() },
     { id: 3, full_name: 'Trần Thị Bình', email: 'hs2@10a1.com', password_hash: '$2b$10$6LYxQ2jqsQ04a.VBLgdCM.hM3rlE.ij3o1uhtmpFyGW/Wonrwxhee', role: 'student', class_name: '10A1', created_at: new Date() },
     { id: 4, full_name: 'Lê Hoàng Cường', email: 'hs3@10a1.com', password_hash: '$2b$10$6LYxQ2jqsQ04a.VBLgdCM.hM3rlE.ij3o1uhtmpFyGW/Wonrwxhee', role: 'student', class_name: '10A1', created_at: new Date() },
@@ -235,7 +235,7 @@ if (isProduction) {
         // Seed default teacher
         await pool.query(`
           INSERT INTO users (full_name, email, password_hash, role) 
-          VALUES ('Cô Nguyễn Thị Hiền', 'teacher', '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG', 'teacher')
+          VALUES ('Ms. Hien', 'teacher', '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG', 'teacher')
         `);
         console.log('--- ĐÃ TẠO TÀI KHOẢN GIÁO VIÊN MẶC ĐỊNH ---');
       } else {
