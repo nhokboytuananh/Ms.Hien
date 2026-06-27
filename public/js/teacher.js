@@ -93,11 +93,12 @@ document.getElementById('create-class-form').addEventListener('submit', async (e
   e.preventDefault();
   const name = document.getElementById('class-name-input').value.toUpperCase().trim();
   const school_year = document.getElementById('class-year-input').value;
+  const grade = document.getElementById('class-grade-input').value;
 
   try {
     await window.apiFetch('/api/classes', {
       method: 'POST',
-      body: JSON.stringify({ name, school_year })
+      body: JSON.stringify({ name, school_year, grade })
     });
     closeClassModal();
     document.getElementById('create-class-form').reset();

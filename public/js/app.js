@@ -390,8 +390,9 @@ function triggerTabLoadData(tabName) {
   }
 
   // HỌC SINH
-  if (tabName === 's-vocab' && typeof window.loadStudentVocabulary === 'function') {
-    window.loadStudentVocabulary();
+  if (tabName === 's-vocab') {
+    if (typeof window.loadStudentVocabulary === 'function') window.loadStudentVocabulary();
+    if (typeof window.loadGameLeaderboards === 'function') window.loadGameLeaderboards();
   }
   if (tabName === 's-exams' && typeof window.loadStudentExams === 'function') {
     window.loadStudentExams();

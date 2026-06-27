@@ -25,7 +25,7 @@ export const requireAuth = async (req, res, next) => {
     const decoded = jwt.verify(token, JWT_SECRET);
     
     // Check if user still exists in database
-    const userRes = await db.query('SELECT id, role FROM users WHERE id = $1', [decoded.id]);
+    const userRes = await db.query('SELECT * FROM users WHERE id = $1', [decoded.id]);
     if (userRes.rows.length === 0) {
       return res.status(401).json({ error: 'Tài khoản không tồn tại. Vui lòng đăng nhập lại.', force_logout: true });
     }
