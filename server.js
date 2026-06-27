@@ -70,10 +70,14 @@ app.get('*', (req, res) => {
 });
 
 // Lắng nghe kết nối trên Port quy định (Mặc định: 3000)
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`=========================================`);
-  console.log(` SERVER ĐÃ KHỞI CHẠY THÀNH CÔNG!`);
-  console.log(` Chạy tại địa chỉ: http://localhost:${PORT}`);
-  console.log(` Môi trường: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`=========================================`);
-});
+if (process.env.NODE_ENV !== 'test' && !process.env.VERCEL) {
+  app.listen(PORT, '0.0.0.0', () => {
+    console.log(`=========================================`);
+    console.log(` SERVER ĐÃ KHỞI CHẠY THÀNH CÔNG!`);
+    console.log(` Chạy tại địa chỉ: http://localhost:${PORT}`);
+    console.log(` Môi trường: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`=========================================`);
+  });
+}
+
+export default app;
