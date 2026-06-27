@@ -553,6 +553,10 @@ window.loadTeacherExams = async () => {
               <i data-lucide="eye" class="w-3.5 h-3.5"></i> Xem & Thi thử
             </button>
             
+            <button onclick="window.exportExamToWord(${e.id})" class="px-2.5 py-1.5 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-100 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+              <i data-lucide="file-text" class="w-3.5 h-3.5"></i> Xuất Word
+            </button>
+
             <button onclick="window.manageExamAssignment(${e.id})" class="px-2.5 py-1.5 ${isDraft ? "bg-emerald-50 hover:bg-emerald-600 hover:text-white text-emerald-700 border-emerald-100" : "bg-brand-50 hover:bg-brand-600 hover:text-white text-brand-700 border-brand-100"} border rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
               <i data-lucide="send" class="w-3.5 h-3.5"></i> ${isDraft ? "Giao đề" : "Quản lý Giao đề"}
             </button>
@@ -591,6 +595,44 @@ window.deleteExam = async (examId) => {
     window.loadTeacherExams();
   } catch (err) {
     alert("Lỗi khi xóa đề thi: " + err.message);
+  }
+};
+
+window.exportExamToWord = async (examId) => {
+  try {
+    const token = window.appState.token || localStorage.getItem("ms_hien_token");
+    const headers = {};
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+    }
+    const response = await fetch(`/api/exams/${examId}/export-word`, {
+      headers: headers
+    });
+    
+    if (!response.ok) {
+      throw new Error(`Mã lỗi từ server: ${response.status}`);
+    }
+    
+    const contentDisposition = response.headers.get("content-disposition");
+    let filename = `De_thi_${examId}.doc`;
+    if (contentDisposition) {
+      const match = contentDisposition.match(/filename="?([^"]+)"?/);
+      if (match && match[1]) {
+        filename = decodeURIComponent(match[1]);
+      }
+    }
+
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+  } catch (err) {
+    alert("Không thể tải đề thi dạng Word: " + err.message);
   }
 };
 

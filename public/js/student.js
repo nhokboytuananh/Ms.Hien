@@ -1118,10 +1118,38 @@ window.startExam = async (examId) => {
     const quickNav = document.getElementById("exam-quick-navigation");
     quickNav.innerHTML = "";
 
+    const shuffleArray = (arr) => {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    };
+
+    const shuffleOptions = (question) => {
+      const opts = [
+        { key: "A", val: question.option_a || "" },
+        { key: "B", val: question.option_b || "" },
+        { key: "C", val: question.option_c || "" },
+        { key: "D", val: question.option_d || "" }
+      ];
+      for (let i = opts.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [opts[i], opts[j]] = [opts[j], opts[i]];
+      }
+      return opts;
+    };
+
     const grouped = groupQuestions(data.questions);
-    grouped.forEach((g, gIdx) => {
+    const shuffledGrouped = shuffleArray(grouped);
+    let currentDisplayNum = 1;
+
+    shuffledGrouped.forEach((g, gIdx) => {
       if (g.type === "single") {
         const qNum = g.original_num;
+        const displayNum = currentDisplayNum++;
+        const shuffledOptions = shuffleOptions(g);
 
         // Khối câu hỏi đơn lẻ
         const div = document.createElement("div");
@@ -1131,7 +1159,7 @@ window.startExam = async (examId) => {
         div.innerHTML = `
           <div class="flex items-center gap-2 border-b border-slate-50 pb-2">
             <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
-              ${qNum}
+              ${displayNum}
             </span>
             <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">${g.part || "Trắc nghiệm"}</span>
           </div>
@@ -1139,20 +1167,20 @@ window.startExam = async (examId) => {
           
           <div class="space-y-2.5">
             <label class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl hover:bg-slate-50 cursor-pointer text-sm transition-all">
-              <input type="radio" name="q-${qNum}" value="A" onclick="selectOption(${qNum}, 'A')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
-              <strong>A.</strong> <span>${g.option_a}</span>
+              <input type="radio" name="q-${qNum}" value="${shuffledOptions[0].key}" onclick="selectOption(${qNum}, '${shuffledOptions[0].key}')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+              <strong>A.</strong> <span>${shuffledOptions[0].val}</span>
             </label>
             <label class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl hover:bg-slate-50 cursor-pointer text-sm transition-all">
-              <input type="radio" name="q-${qNum}" value="B" onclick="selectOption(${qNum}, 'B')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
-              <strong>B.</strong> <span>${g.option_b}</span>
+              <input type="radio" name="q-${qNum}" value="${shuffledOptions[1].key}" onclick="selectOption(${qNum}, '${shuffledOptions[1].key}')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+              <strong>B.</strong> <span>${shuffledOptions[1].val}</span>
             </label>
             <label class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl hover:bg-slate-50 cursor-pointer text-sm transition-all">
-              <input type="radio" name="q-${qNum}" value="C" onclick="selectOption(${qNum}, 'C')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
-              <strong>C.</strong> <span>${g.option_c}</span>
+              <input type="radio" name="q-${qNum}" value="${shuffledOptions[2].key}" onclick="selectOption(${qNum}, '${shuffledOptions[2].key}')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+              <strong>C.</strong> <span>${shuffledOptions[2].val}</span>
             </label>
             <label class="flex items-center gap-3 p-3 border border-slate-100 rounded-xl hover:bg-slate-50 cursor-pointer text-sm transition-all">
-              <input type="radio" name="q-${qNum}" value="D" onclick="selectOption(${qNum}, 'D')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
-              <strong>D.</strong> <span>${g.option_d}</span>
+              <input type="radio" name="q-${qNum}" value="${shuffledOptions[3].key}" onclick="selectOption(${qNum}, '${shuffledOptions[3].key}')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+              <strong>D.</strong> <span>${shuffledOptions[3].val}</span>
             </label>
           </div>
         `;
@@ -1163,7 +1191,7 @@ window.startExam = async (examId) => {
         navBtn.id = `nav-bubble-${qNum}`;
         navBtn.className =
           "w-10 h-10 border border-slate-200 rounded-lg text-xs font-bold text-slate-500 flex items-center justify-center transition-all bg-white hover:bg-slate-50";
-        navBtn.textContent = qNum;
+        navBtn.textContent = displayNum;
         navBtn.onclick = () => {
           document
             .getElementById(`question-block-${qNum}`)
@@ -1195,6 +1223,9 @@ window.startExam = async (examId) => {
         );
         g.subQuestions.forEach((subQ) => {
           const qNum = subQ.original_num;
+          const displayNum = currentDisplayNum++;
+          const shuffledOptions = shuffleOptions(subQ);
+
           const subDiv = document.createElement("div");
           subDiv.id = `question-block-${qNum}`;
           subDiv.className =
@@ -1202,7 +1233,7 @@ window.startExam = async (examId) => {
           subDiv.innerHTML = `
             <div class="flex items-center gap-2 border-b border-slate-50 pb-1.5">
               <span class="w-6 h-6 bg-brand-600 text-white rounded-full flex items-center justify-center font-bold text-xs">
-                ${qNum}
+                ${displayNum}
               </span>
               <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${subQ.part || "Đọc hiểu"}</span>
             </div>
@@ -1210,20 +1241,20 @@ window.startExam = async (examId) => {
             
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               <label class="flex items-center gap-3 p-3 border border-slate-150 rounded-xl bg-white hover:bg-slate-50 cursor-pointer text-sm transition-all">
-                <input type="radio" name="q-${qNum}" value="A" onclick="selectOption(${qNum}, 'A')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
-                <strong class="text-slate-600">A.</strong> <span>${subQ.option_a}</span>
+                <input type="radio" name="q-${qNum}" value="${shuffledOptions[0].key}" onclick="selectOption(${qNum}, '${shuffledOptions[0].key}')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                <strong class="text-slate-600">A.</strong> <span>${shuffledOptions[0].val}</span>
               </label>
               <label class="flex items-center gap-3 p-3 border border-slate-150 rounded-xl bg-white hover:bg-slate-50 cursor-pointer text-sm transition-all">
-                <input type="radio" name="q-${qNum}" value="B" onclick="selectOption(${qNum}, 'B')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
-                <strong class="text-slate-600">B.</strong> <span>${subQ.option_b}</span>
+                <input type="radio" name="q-${qNum}" value="${shuffledOptions[1].key}" onclick="selectOption(${qNum}, '${shuffledOptions[1].key}')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                <strong class="text-slate-600">B.</strong> <span>${shuffledOptions[1].val}</span>
               </label>
               <label class="flex items-center gap-3 p-3 border border-slate-150 rounded-xl bg-white hover:bg-slate-50 cursor-pointer text-sm transition-all">
-                <input type="radio" name="q-${qNum}" value="C" onclick="selectOption(${qNum}, 'C')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
-                <strong class="text-slate-600">C.</strong> <span>${subQ.option_c}</span>
+                <input type="radio" name="q-${qNum}" value="${shuffledOptions[2].key}" onclick="selectOption(${qNum}, '${shuffledOptions[2].key}')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                <strong class="text-slate-600">C.</strong> <span>${shuffledOptions[2].val}</span>
               </label>
               <label class="flex items-center gap-3 p-3 border border-slate-150 rounded-xl bg-white hover:bg-slate-50 cursor-pointer text-sm transition-all">
-                <input type="radio" name="q-${qNum}" value="D" onclick="selectOption(${qNum}, 'D')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
-                <strong class="text-slate-600">D.</strong> <span>${subQ.option_d}</span>
+                <input type="radio" name="q-${qNum}" value="${shuffledOptions[3].key}" onclick="selectOption(${qNum}, '${shuffledOptions[3].key}')" class="w-4 h-4 text-brand-600 focus:ring-brand-500">
+                <strong class="text-slate-600">D.</strong> <span>${shuffledOptions[3].val}</span>
               </label>
             </div>
           `;
@@ -1234,7 +1265,7 @@ window.startExam = async (examId) => {
           navBtn.id = `nav-bubble-${qNum}`;
           navBtn.className =
             "w-10 h-10 border border-slate-200 rounded-lg text-xs font-bold text-slate-500 flex items-center justify-center transition-all bg-white hover:bg-slate-50";
-          navBtn.textContent = qNum;
+          navBtn.textContent = displayNum;
           navBtn.onclick = () => {
             document
               .getElementById(`question-block-${qNum}`)
