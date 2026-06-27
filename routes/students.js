@@ -137,6 +137,22 @@ router.get("/classes/:name/students", requireAuth, async (req, res) => {
 });
 
 /**
+ * @route GET /api/students/free
+ * @desc Lấy danh sách học sinh tự do chưa thuộc lớp nào (Chỉ dành cho Giáo viên)
+ */
+router.get("/students/free", requireAuth, requireTeacher, async (req, res) => {
+  try {
+    const result = await db.query(
+      "SELECT id, full_name, email, class_name, created_at, is_locked FROM users WHERE role = 'student' AND (class_name IS NULL OR class_name = '') ORDER BY full_name ASC"
+    );
+    res.json(result.rows);
+  } catch (error) {
+    console.error("Lỗi khi lấy danh sách học sinh tự do:", error);
+    res.status(500).json({ error: "Không thể lấy danh sách học sinh tự do." });
+  }
+});
+
+/**
  * @route DELETE /api/students/:id
  * @desc Xóa tài khoản học sinh (Chỉ dành cho Giáo viên quản lý học sinh của họ)
  */
