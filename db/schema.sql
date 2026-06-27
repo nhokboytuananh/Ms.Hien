@@ -122,3 +122,14 @@ CREATE TABLE settings (
   value TEXT,
   updated_at TIMESTAMP DEFAULT NOW()
 );
+
+-- Kết quả chơi game của học sinh
+CREATE TABLE IF NOT EXISTS game_results (
+  id SERIAL PRIMARY KEY,
+  student_id INT REFERENCES users(id) ON DELETE CASCADE,
+  score INT NOT NULL,
+  time_spent INT NOT NULL,
+  game_type VARCHAR(50) DEFAULT 'unknown',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+

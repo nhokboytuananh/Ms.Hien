@@ -883,6 +883,10 @@ window.showGameReport = async (score, total) => {
         game_type: window.studentState.gameType,
       }),
     });
+    // Cập nhật bảng xếp hạng ngay lập tức
+    if (typeof window.loadGameLeaderboards === "function") {
+      window.loadGameLeaderboards();
+    }
   } catch (err) {
     console.error("Lỗi lưu kết quả game:", err);
   }

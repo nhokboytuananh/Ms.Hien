@@ -189,6 +189,10 @@ function loadLocalData() {
       }
     }
 
+    if (!data.game_results) {
+      data.game_results = [];
+    }
+
     return data;
   } catch (error) {
     console.error('Không thể load database local:', error);
@@ -817,6 +821,62 @@ if (isProduction) {
           };
         });
         return { rows: joined, rowCount: joined.length };
+      }
+
+      // 28. INSERT INTO game_results
+      if (queryStr.match(/insert\s+into\s+game_results/i)) {
+        if (!data.game_results) data.game_results = [];
+        const id = data.game_results.reduce((max, g) => g.id > max ? g.id : max, 0) + 1;
+        const newGameResult = {
+          id,
+          student_id: Number(params[0]),
+          score: Number(params[1]),
+          time_spent: Number(params[2]),
+          game_type: params[3] || 'unknown',
+          created_at: new Date()
+        };
+        data.game_results.push(newGameResult);
+        saveLocalData(data);
+        return { rows: [newGameResult], rowCount: 1 };
+      }
+
+      // 29. SELECT count(g.id) FROM game_results g JOIN users u
+      if (queryStr.match(/game_results/i) && queryStr.match(/count\(g\.id\)/i)) {
+        if (!data.game_results) data.game_results = [];
+        const counts = {};
+        for (const g of data.game_results) {
+          counts[g.student_id] = (counts[g.student_id] || 0) + 1;
+        }
+        const rows = Object.keys(counts).map(uid => {
+          const u = data.users.find(user => user.id === Number(uid));
+          return {
+            full_name: u ? u.full_name : 'Học sinh ẩn danh',
+            play_count: counts[uid]
+          };
+        }).sort((a, b) => b.play_count - a.play_count).slice(0, 5);
+
+        return { rows, rowCount: rows.length };
+      }
+
+      // 30. SELECT g.score, g.time_spent FROM game_results g JOIN users u
+      if (queryStr.match(/game_results/i) && queryStr.match(/order\s+by\s+g\.score/i)) {
+        if (!data.game_results) data.game_results = [];
+        const rows = data.game_results.map(g => {
+          const u = data.users.find(user => user.id === g.student_id);
+          return {
+            full_name: u ? u.full_name : 'Học sinh ẩn danh',
+            score: g.score,
+            time_spent: g.time_spent,
+            game_type: g.game_type
+          };
+        }).sort((a, b) => {
+          if (b.score !== a.score) {
+            return b.score - a.score;
+          }
+          return a.time_spent - b.time_spent;
+        }).slice(0, 5);
+
+        return { rows, rowCount: rows.length };
       }
 
       // Fallback mặc định cho các câu truy vấn khác (trả về mảng rỗng để không crash)
