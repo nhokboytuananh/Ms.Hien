@@ -219,12 +219,17 @@ router.post(
       const prompt = `Sinh ngẫu nhiên 5 từ vựng tiếng Anh trình độ trung học phổ thông khối ${grade}. Đảm bảo các từ vựng này phổ biến và bám sát chương trình học khối ${grade}.
     Hãy cung cấp từ, phát âm IPA, nghĩa tiếng việt, câu ví dụ và dịch nghĩa của ví dụ.`;
 
-      const result = await generateWithRetry(
-        aiClient,
-        "gemini-2.5-pro",
-        prompt,
-        vocabSchema,
-      );
+      const response = await generateWithRetry({
+        model: "gemini-3.5-flash",
+        contents: prompt,
+        config: {
+          responseMimeType: "application/json",
+          responseSchema: vocabSchema
+        }
+      });
+      
+      const resultText = response.text;
+      const result = JSON.parse(resultText);
 
       let count = 0;
       for (const v of result) {

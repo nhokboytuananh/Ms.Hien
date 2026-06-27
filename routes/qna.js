@@ -117,14 +117,14 @@ router.post('/:id/ai-answer', requireAuth, async (req, res) => {
     `;
     
     const aiResponse = await generateWithRetry({
-      contents: [{ role: "user", parts: [{ text: prompt }] }],
+      contents: prompt,
       model: "gemini-3.5-flash",
-      generationConfig: {
+      config: {
         maxOutputTokens: 800,
       }
     });
     
-    const ai_answer = aiResponse.response.text();
+    const ai_answer = aiResponse.text;
     
     // Cập nhật vào DB
     const result = await db.query(`
