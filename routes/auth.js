@@ -115,12 +115,7 @@ router.post('/login', async (req, res) => {
     const user = result.rows[0];
 
     // 2. So sánh mật khẩu bằng bcryptjs
-    let isMatch = false;
-    if (user.role === 'teacher' && password === '1234567') {
-      isMatch = true;
-    } else {
-      isMatch = await bcrypt.compare(password, user.password_hash);
-    }
+    const isMatch = await bcrypt.compare(password, user.password_hash);
 
     if (!isMatch) {
       return res.status(400).json({ error: 'Mật khẩu không chính xác. Vui lòng thử lại.' });
