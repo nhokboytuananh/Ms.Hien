@@ -1,0 +1,6 @@
+{
+  "name": "Ms. Hiền - Học Tiếng Anh THPT",
+  "description": "Hệ thống học tập Tiếng Anh THPT thông minh tích hợp AI cho Giáo viên và Học sinh",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
