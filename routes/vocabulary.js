@@ -4,10 +4,15 @@
  */
 
 import express from 'express';
+import multer from 'multer';
+import * as xlsx from 'xlsx';
 import db from '../db/index.js';
 import { requireAuth, requireTeacher } from '../middleware/auth.js';
+import { getGeminiClient, generateWithRetry } from '../lib/gemini.js';
+import { Type } from '@google/genai';
 
 const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
 
 /**
  * @route GET /api/vocabulary
@@ -149,6 +154,127 @@ router.delete('/vocabulary/:id', requireAuth, requireTeacher, async (req, res) =
   } catch (error) {
     console.error('Lỗi khi xóa từ vựng:', error);
     res.status(500).json({ error: 'Không thể xóa từ vựng.' });
+  }
+});
+
+/**
+ * @route POST /api/vocabulary/ai-generate
+ * @desc Tự động sinh 5 từ vựng theo khối lớp bằng AI
+ */
+router.post('/vocabulary/ai-generate', requireTeacher, async (req, res) => {
+  const { grade } = req.body;
+  if (!grade) {
+    return res.status(400).json({ error: 'Vui lòng chọn khối lớp.' });
+  }
+  
+  try {
+    const aiClient = getGeminiClient();
+    if (!aiClient) {
+      return res.status(500).json({ error: 'AI Client chưa được cấu hình (Thiếu GEMINI_API_KEY).' });
+    }
+    
+    const vocabSchema = {
+      type: Type.ARRAY,
+      items: {
+        type: Type.OBJECT,
+        properties: {
+          word: { type: Type.STRING, description: "Từ vựng tiếng Anh" },
+          pronunciation: { type: Type.STRING, description: "Phát âm IPA" },
+          meaning_vi: { type: Type.STRING, description: "Nghĩa tiếng Việt" },
+          example_en: { type: Type.STRING, description: "Ví dụ tiếng Anh" },
+          example_vi: { type: Type.STRING, description: "Dịch nghĩa ví dụ" }
+        },
+        required: ["word", "meaning_vi"]
+      }
+    };
+    
+    const prompt = `Sinh ngẫu nhiên 5 từ vựng tiếng Anh trình độ trung học phổ thông khối ${grade}. Đảm bảo các từ vựng này phổ biến và bám sát chương trình học khối ${grade}.
+    Hãy cung cấp từ, phát âm IPA, nghĩa tiếng việt, câu ví dụ và dịch nghĩa của ví dụ.`;
+    
+    const result = await generateWithRetry(aiClient, 'gemini-2.5-pro', prompt, vocabSchema);
+    
+    let count = 0;
+    for (const v of result) {
+      await db.query(
+        `INSERT INTO vocabulary 
+         (word, pronunciation, meaning_vi, example_en, example_vi, grade, created_by)
+         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+        [
+          v.word || '', 
+          v.pronunciation || '', 
+          v.meaning_vi || '', 
+          v.example_en || '', 
+          v.example_vi || '', 
+          Number(grade),
+          req.user.id
+        ]
+      );
+      count++;
+    }
+    
+    res.json({ message: 'Tạo thành công', count });
+  } catch (error) {
+    console.error('Lỗi khi sinh từ vựng bằng AI:', error);
+    res.status(500).json({ error: 'Lỗi AI: ' + error.message });
+  }
+});
+
+/**
+ * @route POST /api/vocabulary/import-excel
+ * @desc Nhập từ vựng từ file Excel
+ */
+router.post('/vocabulary/import-excel', requireTeacher, upload.single('file'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'Không tìm thấy file tải lên.' });
+  }
+  
+  try {
+    const workbook = xlsx.read(req.file.buffer, { type: 'buffer' });
+    const sheetName = workbook.SheetNames[0];
+    const sheet = workbook.Sheets[sheetName];
+    const data = xlsx.utils.sheet_to_json(sheet);
+    
+    if (!data || data.length === 0) {
+      return res.status(400).json({ error: 'File Excel trống hoặc không đúng định dạng.' });
+    }
+    
+    let count = 0;
+    for (const row of data) {
+      // row keys có thể phụ thuộc vào file Excel, ta mong đợi: Word, Pronunciation, Meaning, Example, Grade
+      // Chuẩn hóa keys:
+      const getVal = (possibleKeys) => {
+        for (const k of possibleKeys) {
+          if (row[k] !== undefined) return row[k];
+        }
+        return '';
+      };
+      
+      const word = getVal(['Word', 'Từ vựng', 'Tu vung', 'word']);
+      if (!word) continue;
+      
+      const pronunciation = getVal(['Pronunciation', 'Phát âm', 'Phat am', 'pronunciation']);
+      const meaning_vi = getVal(['Meaning', 'Nghĩa tiếng Việt', 'Nghia', 'meaning_vi', 'meaning']);
+      const example_en = getVal(['Example', 'Ví dụ tiếng Anh', 'Vi du', 'example_en', 'example']);
+      const gradeRaw = getVal(['Grade', 'Khối', 'Khoi', 'Lớp', 'grade']);
+      
+      let grade = 10;
+      if (gradeRaw && !isNaN(Number(gradeRaw))) {
+        grade = Number(gradeRaw);
+      }
+      
+      await db.query(
+        `INSERT INTO vocabulary 
+         (word, pronunciation, meaning_vi, example_en, grade, created_by)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
+        [word, pronunciation, meaning_vi, example_en, grade, req.user.id]
+      );
+      count++;
+    }
+    
+    res.json({ message: 'Nhập thành công', count });
+  } catch (error) {
+    console.error('Lỗi khi nhập Excel:', error);
+    res.status(500).json({ error: 'Lỗi khi nhập dữ liệu: ' + error.message });
   }
 });
 

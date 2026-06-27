@@ -17,7 +17,8 @@
     "dotenv": "^17.2.3",
     "express": "^4.21.2",
     "jsonwebtoken": "^9.0.3",
-    "pg": "^8.22.0"
-  },
-  "devDependencies": {}
+    "multer": "^2.2.0",
+    "pg": "^8.22.0",
+    "xlsx": "^0.18.5"
+  }
 }

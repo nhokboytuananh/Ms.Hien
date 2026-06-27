@@ -344,12 +344,18 @@
                 <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Kho Từ Vựng THPT</h2>
                 <p class="text-sm text-slate-500">Thêm từ mới, biên soạn ví dụ minh họa và tổ chức bài học bám sát SGK.</p>
               </div>
-              <div class="flex items-center gap-3">
+              <div class="flex flex-wrap items-center gap-3">
                 <button onclick="openTeacherGameModal()" class="px-4 py-2 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-all shadow-sm cursor-pointer">
                   <i data-lucide="gamepad-2" class="w-4 h-4"></i> Chơi thử Game 🎮
                 </button>
+                <button onclick="openCreateVocabAiModal()" class="px-4 py-2 bg-brand-50 hover:bg-brand-100 text-brand-700 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-all shadow-sm">
+                  <i data-lucide="bot" class="w-4 h-4"></i> Thêm bằng AI
+                </button>
+                <button onclick="openImportExcelModal()" class="px-4 py-2 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 rounded-xl text-sm font-bold flex items-center gap-1.5 transition-all shadow-sm">
+                  <i data-lucide="file-spreadsheet" class="w-4 h-4"></i> Nhập từ Excel
+                </button>
                 <button onclick="openCreateVocabModal()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-bold flex items-center gap-1.5 transition-all shadow-md">
-                  <i data-lucide="plus" class="w-4 h-4"></i> Thêm từ vựng mới
+                  <i data-lucide="plus" class="w-4 h-4"></i> Thêm thủ công
                 </button>
               </div>
             </div>
@@ -1249,6 +1255,64 @@
       <p class="text-[10px] text-slate-300">Nền tảng được tối ưu hóa cho giáo trình THPT Việt Nam và hỗ trợ hoàn toàn bởi Gemini AI.</p>
     </div>
   </footer>
+
+  <!-- MODAL: THÊM TỪ VỰNG BẰNG AI (GIÁO VIÊN) -->
+  <div id="create-vocab-ai-modal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[60] hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
+      <button onclick="closeCreateVocabAiModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><i data-lucide="bot" class="w-5 h-5 text-brand-500"></i> Thêm 5 từ vựng bằng AI</h3>
+      <p class="text-xs text-slate-500 mb-4">Chọn khối lớp, AI sẽ tự động sinh ngẫu nhiên 5 từ vựng kèm ví dụ phù hợp với trình độ khối lớp đó.</p>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Chọn Khối Lớp</label>
+          <select id="vocab-ai-grade" class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500 text-sm">
+            <option value="10">Khối 10</option>
+            <option value="11">Khối 11</option>
+            <option value="12">Khối 12</option>
+          </select>
+        </div>
+        
+        <div class="flex justify-end gap-3 mt-6">
+          <button onclick="closeCreateVocabAiModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm font-semibold transition-all">Hủy</button>
+          <button id="btn-generate-vocab-ai" onclick="generateVocabByAi()" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-sm font-bold transition-all shadow-md flex items-center gap-2">
+            <i data-lucide="wand-2" class="w-4 h-4"></i> Tạo từ vựng ngay
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: NHẬP TỪ VỰNG TỪ EXCEL (GIÁO VIÊN) -->
+  <div id="import-vocab-excel-modal" class="fixed inset-0 bg-slate-900/60 flex items-center justify-center p-4 z-[60] hidden">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl relative">
+      <button onclick="closeImportExcelModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600">
+        <i data-lucide="x" class="w-5 h-5"></i>
+      </button>
+      <h3 class="text-lg font-bold text-slate-900 mb-4 flex items-center gap-2"><i data-lucide="file-spreadsheet" class="w-5 h-5 text-emerald-500"></i> Nhập Từ Vựng Từ Excel</h3>
+      <p class="text-xs text-slate-500 mb-4">Tải file mẫu về, điền từ vựng sau đó tải lên để nhập hàng loạt vào hệ thống.</p>
+      
+      <div class="space-y-4">
+        <a href="/Mau_Nhap_Tu_Vung.xlsx" download class="block w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-center rounded-lg text-sm font-semibold transition-all border border-slate-300">
+          <i data-lucide="download" class="w-4 h-4 inline-block align-text-bottom mr-1"></i> Tải File Mẫu
+        </a>
+        
+        <div>
+          <label class="block text-xs font-bold uppercase text-slate-500 mb-1">Chọn File Excel Của Bạn</label>
+          <input type="file" id="vocab-excel-file" accept=".xlsx, .xls" class="w-full text-sm text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100 cursor-pointer">
+        </div>
+        
+        <div class="flex justify-end gap-3 mt-6">
+          <button onclick="closeImportExcelModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-600 rounded-lg text-sm font-semibold transition-all">Hủy</button>
+          <button id="btn-import-vocab-excel" onclick="importVocabExcel()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-sm font-bold transition-all shadow-md flex items-center gap-2">
+            <i data-lucide="upload" class="w-4 h-4"></i> Nhập dữ liệu
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- MODAL QUÊN MẬT KHẨU -->
   <div id="forgot-password-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 hidden">

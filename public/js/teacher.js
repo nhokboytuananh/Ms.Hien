@@ -235,6 +235,92 @@ window.loadTeacherVocabulary = async () => {
   }
 };
 
+window.openCreateVocabAiModal = () => {
+  document.getElementById('create-vocab-ai-modal').classList.remove('hidden');
+};
+
+window.closeCreateVocabAiModal = () => {
+  document.getElementById('create-vocab-ai-modal').classList.add('hidden');
+};
+
+window.generateVocabByAi = async () => {
+  const grade = document.getElementById('vocab-ai-grade').value;
+  const btn = document.getElementById('btn-generate-vocab-ai');
+  const originalHtml = btn.innerHTML;
+  
+  try {
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang tạo...';
+    btn.disabled = true;
+    
+    const res = await window.apiFetch('/api/vocabulary/ai-generate', {
+      method: 'POST',
+      body: JSON.stringify({ grade })
+    });
+    
+    alert(`Đã thêm thành công ${res.count} từ vựng!`);
+    closeCreateVocabAiModal();
+    window.loadTeacherVocabulary();
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    if (window.lucide) window.lucide.createIcons();
+  }
+};
+
+window.openImportExcelModal = () => {
+  document.getElementById('vocab-excel-file').value = '';
+  document.getElementById('import-vocab-excel-modal').classList.remove('hidden');
+};
+
+window.closeImportExcelModal = () => {
+  document.getElementById('import-vocab-excel-modal').classList.add('hidden');
+};
+
+window.importVocabExcel = async () => {
+  const fileInput = document.getElementById('vocab-excel-file');
+  if (!fileInput.files || fileInput.files.length === 0) {
+    alert('Vui lòng chọn file Excel để tải lên!');
+    return;
+  }
+  
+  const file = fileInput.files[0];
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const btn = document.getElementById('btn-import-vocab-excel');
+  const originalHtml = btn.innerHTML;
+  
+  try {
+    btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i> Đang tải lên...';
+    btn.disabled = true;
+    
+    // We cannot use window.apiFetch directly for FormData if it stringifies it, but apiFetch might handle it or we can use fetch directly.
+    const token = localStorage.getItem('ms_hien_token');
+    const res = await fetch('/api/vocabulary/import-excel', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData
+    });
+    
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Có lỗi xảy ra');
+    
+    alert(`Đã nhập thành công ${data.count} từ vựng!`);
+    closeImportExcelModal();
+    window.loadTeacherVocabulary();
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
+    if (window.lucide) window.lucide.createIcons();
+  }
+};
+
 window.openCreateVocabModal = () => {
   document.getElementById('vocab-modal-title').textContent = 'Thêm Từ Vựng Mới';
   document.getElementById('vocab-form').reset();

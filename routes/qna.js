@@ -29,7 +29,7 @@ router.get('/', requireAuth, async (req, res) => {
     res.json(result.rows);
   } catch (error) {
     console.error('Lỗi khi lấy danh sách câu hỏi:', error);
-    res.status(500).json({ error: 'Lỗi máy chủ' });
+    res.status(500).json({ error: error.message || 'Lỗi máy chủ' });
   }
 });
 
@@ -55,7 +55,7 @@ router.post('/', requireAuth, async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Lỗi khi đặt câu hỏi:', error);
-    res.status(500).json({ error: 'Lỗi máy chủ' });
+    res.status(500).json({ error: error.message || 'Lỗi máy chủ' });
   }
 });
 
@@ -88,7 +88,7 @@ router.post('/:id/teacher-answer', requireAuth, async (req, res) => {
     res.json(result.rows[0]);
   } catch (error) {
     console.error('Lỗi khi giáo viên trả lời câu hỏi:', error);
-    res.status(500).json({ error: 'Lỗi máy chủ' });
+    res.status(500).json({ error: error.message || 'Lỗi máy chủ' });
   }
 });
 
