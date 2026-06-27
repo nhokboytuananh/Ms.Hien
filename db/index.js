@@ -221,16 +221,38 @@ if (isProduction) {
     console.error('Lỗi không mong muốn trên PostgreSQL pool nhàn rỗi:', err);
   });
 
-  // Tự động đồng bộ thông tin giáo viên mặc định trong PostgreSQL thực tế khi khởi chạy
-  pool.query(`
-    UPDATE users 
-    SET email = 'teacher', password_hash = '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG' 
-    WHERE role = 'teacher' OR id = 1
-  `).then(() => {
-    console.log('--- ĐÃ ĐỒNG BỘ TÀI KHOẢN GIÁO VIÊN MẶC ĐỊNH TRONG POSTGRESQL THÀNH CÔNG ---');
-  }).catch(err => {
-    console.error('Lỗi khi đồng bộ tài khoản giáo viên trong PostgreSQL:', err);
-  });
+  // Tự động khởi tạo schema nếu chưa có
+  async function initSchema() {
+    try {
+      const checkTable = await pool.query("SELECT to_regclass('public.users') as table_exists");
+      if (!checkTable.rows[0].table_exists) {
+        console.log('--- KHÔNG TÌM THẤY BẢNG USERS, ĐANG TỰ ĐỘNG CHẠY SCHEMA.SQL ---');
+        const schemaPath = path.join(process.cwd(), 'db', 'schema.sql');
+        const schema = fs.readFileSync(schemaPath, 'utf8');
+        await pool.query(schema);
+        console.log('--- ĐÃ TẠO DATABASE SCHEMA THÀNH CÔNG ---');
+        
+        // Seed default teacher
+        await pool.query(`
+          INSERT INTO users (full_name, email, password_hash, role) 
+          VALUES ('Cô Nguyễn Thị Hiền', 'teacher', '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG', 'teacher')
+        `);
+        console.log('--- ĐÃ TẠO TÀI KHOẢN GIÁO VIÊN MẶC ĐỊNH ---');
+      } else {
+        // Nếu đã có bảng, chỉ đồng bộ thông tin giáo viên mặc định
+        await pool.query(`
+          UPDATE users 
+          SET email = 'teacher', password_hash = '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG' 
+          WHERE role = 'teacher' OR id = 1
+        `);
+        console.log('--- ĐÃ ĐỒNG BỘ TÀI KHOẢN GIÁO VIÊN MẶC ĐỊNH TRONG POSTGRESQL THÀNH CÔNG ---');
+      }
+    } catch (err) {
+      console.error('Lỗi khi khởi tạo schema PostgreSQL:', err);
+    }
+  }
+  
+  initSchema();
 
   dbExecutor = {
     async query(text, params) {

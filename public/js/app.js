@@ -21,14 +21,25 @@ window.apiFetch = async (endpoint, options = {}) => {
     ...(options.headers || {})
   };
 
-  const response = await fetch(`${API_BASE}${endpoint}`, {
-    ...options,
-    headers
-  });
+  let response;
+  try {
+    response = await fetch(`${API_BASE}${endpoint}`, {
+      ...options,
+      headers
+    });
+  } catch (err) {
+    throw new Error(`Lỗi kết nối mạng đến ${API_BASE}${endpoint}: ` + err.message);
+  }
 
-  const data = await response.json();
+  let data;
+  try {
+    data = await response.json();
+  } catch (err) {
+    throw new Error(`Lỗi phân tích JSON từ server (${response.status} ${response.statusText}). Endpoint: ${API_BASE}${endpoint}`);
+  }
+
   if (!response.ok) {
-    throw new Error(data.error || 'Đã xảy ra lỗi khi kết nối máy chủ.');
+    throw new Error(data?.error || data?.message || 'Đã xảy ra lỗi khi kết nối máy chủ.');
   }
   return data;
 };

@@ -17,5 +17,6 @@ if (backendUrl) {
   fs.writeFileSync(appJsPath, appJs);
   console.log(`[Build] Đã cập nhật API_BASE thành: ${backendUrl}`);
 } else {
-  console.log(`[Build] Không tìm thấy biến môi trường BACKEND_URL, giữ nguyên API_BASE mặc định.`);
+  console.error(`[Build Lỗi] Không tìm thấy biến môi trường BACKEND_URL! Vui lòng thêm BACKEND_URL vào Vercel Environment Variables và Redeploy.`);
+  process.exit(1);
 }
