@@ -2,7 +2,7 @@
 
 -- 1. GIÁO VIÊN MẪU
 INSERT INTO users (id, full_name, email, password_hash, role) VALUES 
-(1, 'Ms. Hien', 'teacher', '$2b$10$L9CIaPdQYjmXpTS35VcmWOxx1yCRBqYNiPYR1okQ5aJriYWtML5xu', 'teacher');
+(1, 'Ms. Hien', 'teacher', '$2b$10$6LYxQ2jqsQ04a.VBLgdCM.hM3rlE.ij3o1uhtmpFyGW/Wonrwxhee', 'teacher');
 
 -- 2. HỌC SINH MẪU
 -- Lớp 10A1
