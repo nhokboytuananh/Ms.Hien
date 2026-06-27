@@ -145,7 +145,7 @@ router.post('/login', async (req, res) => {
     });
   } catch (error) {
     console.error('Lỗi khi đăng nhập:', error);
-    res.status(500).json({ error: 'Đã xảy ra lỗi trên hệ thống. Vui lòng thử lại sau.' });
+    res.status(500).json({ error: `Đã xảy ra lỗi trên hệ thống: ${error.message}` });
   }
 });
 
