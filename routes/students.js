@@ -82,11 +82,9 @@ router.delete("/classes/:id", requireAuth, requireTeacher, async (req, res) => {
     );
 
     if (classResult.rows.length === 0) {
-      return res
-        .status(404)
-        .json({
-          error: "Lớp học không tồn tại hoặc bạn không có quyền xóa lớp này.",
-        });
+      return res.status(404).json({
+        error: "Lớp học không tồn tại hoặc bạn không có quyền xóa lớp này.",
+      });
     }
 
     const className = classResult.rows[0].name;
@@ -127,7 +125,7 @@ router.get("/classes/:name/students", requireAuth, async (req, res) => {
     }
 
     const result = await db.query(
-      "SELECT id, full_name, email, class_name, created_at FROM users WHERE role = 'student' AND class_name = $1 ORDER BY full_name ASC",
+      "SELECT id, full_name, email, class_name, created_at, is_locked FROM users WHERE role = 'student' AND class_name = $1 ORDER BY full_name ASC",
       [className],
     );
 
@@ -176,12 +174,10 @@ router.delete(
         student.class_name &&
         !teacherClassNames.includes(student.class_name)
       ) {
-        return res
-          .status(403)
-          .json({
-            error:
-              "Bạn không có quyền xóa học sinh này vì thuộc lớp của giáo viên khác.",
-          });
+        return res.status(403).json({
+          error:
+            "Bạn không có quyền xóa học sinh này vì thuộc lớp của giáo viên khác.",
+        });
       }
 
       // 3. Tiến hành xóa học sinh
@@ -192,6 +188,90 @@ router.delete(
     } catch (error) {
       console.error("Lỗi khi xóa học sinh:", error);
       res.status(500).json({ error: "Không thể xóa học sinh này." });
+    }
+  },
+);
+
+import bcrypt from "bcryptjs";
+
+/**
+ * @route POST /api/students/:id/reset-password
+ * @desc Reset mật khẩu cho học sinh (Giáo viên)
+ */
+router.post(
+  "/students/:id/reset-password",
+  requireAuth,
+  requireTeacher,
+  async (req, res) => {
+    const studentId = Number(req.params.id);
+    const teacherId = req.user.id;
+
+    try {
+      const studentRes = await db.query(
+        "SELECT * FROM users WHERE id = $1 AND role = 'student'",
+        [studentId],
+      );
+      if (studentRes.rows.length === 0) {
+        return res.status(404).json({ error: "Không tìm thấy học sinh." });
+      }
+
+      const newPassword = Math.floor(
+        100000 + Math.random() * 900000,
+      ).toString();
+      const hash = await bcrypt.hash(newPassword, 10);
+
+      await db.query("UPDATE users SET password_hash = $1 WHERE id = $2", [
+        hash,
+        studentId,
+      ]);
+
+      res.json({
+        message: "Đặt lại mật khẩu thành công.",
+        newPassword,
+      });
+    } catch (error) {
+      console.error("Lỗi khi reset mật khẩu:", error);
+      res.status(500).json({ error: "Lỗi hệ thống." });
+    }
+  },
+);
+
+/**
+ * @route PUT /api/students/:id/toggle-lock
+ * @desc Khóa/Mở khóa tài khoản học sinh
+ */
+router.put(
+  "/students/:id/toggle-lock",
+  requireAuth,
+  requireTeacher,
+  async (req, res) => {
+    const studentId = Number(req.params.id);
+
+    try {
+      const studentRes = await db.query(
+        "SELECT * FROM users WHERE id = $1 AND role = 'student'",
+        [studentId],
+      );
+      if (studentRes.rows.length === 0) {
+        return res.status(404).json({ error: "Không tìm thấy học sinh." });
+      }
+
+      const newStatus = !studentRes.rows[0].is_locked;
+
+      await db.query("UPDATE users SET is_locked = $1 WHERE id = $2", [
+        newStatus,
+        studentId,
+      ]);
+
+      res.json({
+        message: newStatus
+          ? "Đã khóa tài khoản thành công."
+          : "Đã mở khóa tài khoản thành công.",
+        is_locked: newStatus,
+      });
+    } catch (error) {
+      console.error("Lỗi khi khóa/mở khóa:", error);
+      res.status(500).json({ error: "Lỗi hệ thống." });
     }
   },
 );
@@ -235,11 +315,9 @@ router.put(
         student.class_name &&
         !teacherClassNames.includes(student.class_name)
       ) {
-        return res
-          .status(403)
-          .json({
-            error: "Bạn không có quyền quản lý học sinh thuộc lớp này.",
-          });
+        return res.status(403).json({
+          error: "Bạn không có quyền quản lý học sinh thuộc lớp này.",
+        });
       }
 
       if (class_name && !teacherClassNames.includes(class_name)) {

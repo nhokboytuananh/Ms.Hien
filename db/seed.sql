@@ -1,8 +1,8 @@
--- Mã hóa mật khẩu '1234567' bằng bcrypt: $2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG
+-- Mã hóa mật khẩu '1234567' bằng bcrypt: $2b$10$L9CIaPdQYjmXpTS35VcmWOxx1yCRBqYNiPYR1okQ5aJriYWtML5xu
 
 -- 1. GIÁO VIÊN MẪU
 INSERT INTO users (id, full_name, email, password_hash, role) VALUES 
-(1, 'Ms. Hien', 'teacher', '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG', 'teacher');
+(1, 'Ms. Hien', 'teacher', '$2b$10$L9CIaPdQYjmXpTS35VcmWOxx1yCRBqYNiPYR1okQ5aJriYWtML5xu', 'teacher');
 
 -- 2. HỌC SINH MẪU
 -- Lớp 10A1
