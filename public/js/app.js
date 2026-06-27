@@ -39,6 +39,11 @@ window.apiFetch = async (endpoint, options = {}) => {
   }
 
   if (!response.ok) {
+    if (response.status === 401) {
+      if (data?.force_logout || data?.error?.includes('hết hạn') || data?.error?.includes('tồn tại')) {
+        window.logout();
+      }
+    }
     throw new Error(data?.error || data?.message || 'Đã xảy ra lỗi khi kết nối máy chủ.');
   }
   return data;
@@ -230,14 +235,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
   });
 
-  // Nút đăng xuất
-  document.getElementById('btn-logout').addEventListener('click', () => {
+  // Đăng xuất toàn cục
+  window.logout = () => {
     localStorage.removeItem('ms_hien_token');
     window.appState.token = null;
     window.appState.user = null;
     document.getElementById('auth-screen').classList.remove('hidden');
     document.getElementById('main-screen').classList.add('hidden');
     document.getElementById('auth-alert').classList.add('hidden');
+    
+    // Clear intervals if any
+    if (window.studentState?.examTimerInterval) {
+      clearInterval(window.studentState.examTimerInterval);
+    }
+  };
+
+  // Nút đăng xuất
+  document.getElementById('btn-logout').addEventListener('click', () => {
+    window.logout();
   });
 
   // Kiểm tra phiên đăng nhập hiện tại khi load trang

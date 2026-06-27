@@ -1501,14 +1501,14 @@ window.gradeTeacherPreviewExam = () => {
   questions.forEach((q, idx) => {
     const qNum = idx + 1;
     const userAnswer = answers[qNum];
-    const correctAnswer = q.correct_answer.trim().toUpperCase();
+    const correctAnswer = q.correct_answer ? String(q.correct_answer).trim().toUpperCase() : '';
 
     const block = document.getElementById(`preview-question-block-${qNum}`);
     
     // Đổ màu các lựa chọn đúng / sai
     const getLabel = (opt) => block.querySelector(`.option-label-${opt}`);
 
-    const correctLabel = getLabel(correctAnswer);
+    const correctLabel = correctAnswer ? getLabel(correctAnswer) : null;
     if (correctLabel) {
       correctLabel.classList.add('bg-emerald-50', 'border-emerald-500', 'text-emerald-900', 'font-medium');
     }
@@ -1633,7 +1633,7 @@ window.manageExamAssignment = async (examId) => {
         method: 'PUT',
         body: JSON.stringify({ status: newStatus, assigned_groups: newGroups })
       });
-      window.showToast(res.message || 'Cập nhật giao đề thành công!');
+      alert(res.message || 'Cập nhật giao đề thành công!');
       if (window.closeTeacherExamPreviewModal) window.closeTeacherExamPreviewModal();
       window.loadTeacherExams();
     } catch (err) {

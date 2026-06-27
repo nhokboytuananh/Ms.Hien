@@ -1096,9 +1096,9 @@ function showExamSolutions(questions, studentAnswers) {
   grouped.forEach((g, gIdx) => {
     if (g.type === 'single') {
       const qNum = g.original_num;
-      const sAns = studentAnswers[qNum] || 'Chưa làm';
-      const cAns = g.correct_answer.toUpperCase().trim();
-      const isCorrect = sAns.toUpperCase().trim() === cAns;
+      const sAns = studentAnswers[qNum] || '';
+      const cAns = g.correct_answer ? String(g.correct_answer).toUpperCase().trim() : '';
+      const isCorrect = sAns && cAns && String(sAns).toUpperCase().trim() === cAns;
 
       const div = document.createElement('div');
       div.className = `p-6 rounded-2xl border ${
@@ -1162,9 +1162,9 @@ function showExamSolutions(questions, studentAnswers) {
       const subContainer = groupBlock.querySelector(`#solutions-sub-container-${gIdx}`);
       g.subQuestions.forEach((subQ) => {
         const qNum = subQ.original_num;
-        const sAns = studentAnswers[qNum] || 'Chưa làm';
-        const cAns = subQ.correct_answer.toUpperCase().trim();
-        const isCorrect = sAns.toUpperCase().trim() === cAns;
+        const sAns = studentAnswers[qNum] || '';
+        const cAns = subQ.correct_answer ? String(subQ.correct_answer).toUpperCase().trim() : '';
+        const isCorrect = sAns && cAns && String(sAns).toUpperCase().trim() === cAns;
 
         const subDiv = document.createElement('div');
         subDiv.className = `p-5 rounded-2xl border ${
