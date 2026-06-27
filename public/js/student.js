@@ -74,7 +74,7 @@ window.startFlashcardStudy = () => {
 
   if (filtered.length === 0) {
     alert(
-      "Khối lớp hiện tại chưa được soạn từ vựng. Cô Hiền đang cập nhật thêm, con vui lòng chọn lớp khác nhé!",
+      "Khối lớp hiện tại chưa được soạn từ vựng. Cô Hiền đang cập nhật thêm, em vui lòng chọn lớp khác nhé!",
     );
     return;
   }
@@ -297,7 +297,7 @@ window.startGame = (gameType) => {
 window.quitGame = () => {
   if (
     confirm(
-      "Con có chắc chắn muốn thoát lượt chơi hiện tại không? Mọi điểm số chưa hoàn thành sẽ không được lưu lại đâu.",
+      "Em có chắc chắn muốn thoát lượt chơi hiện tại không? Mọi điểm số chưa hoàn thành sẽ không được lưu lại đâu.",
     )
   ) {
     window.initGameHub();
@@ -479,7 +479,7 @@ window.submitQuizAnswer = (chosenOption, clickedBtn) => {
     });
 
     feedback.textContent =
-      "🥳 Xuất sắc! Con đã chọn đáp án hoàn toàn chính xác!";
+      "🥳 Xuất sắc! Em đã chọn đáp án hoàn toàn chính xác!";
     feedback.className =
       "p-4 rounded-xl text-sm font-bold text-center bg-emerald-50 text-emerald-700 border border-emerald-200";
   } else {
@@ -487,7 +487,7 @@ window.submitQuizAnswer = (chosenOption, clickedBtn) => {
     document.getElementById("quiz-wrong-count").textContent =
       window.studentState.gameWrongAnswers;
 
-    feedback.innerHTML = `😢 Gần đúng rồi con ơi! Từ vựng chuẩn phải là: <strong class="text-rose-700 uppercase font-mono">${correctWord}</strong>.`;
+    feedback.innerHTML = `😢 Gần đúng rồi em ơi! Từ vựng chuẩn phải là: <strong class="text-rose-700 uppercase font-mono">${correctWord}</strong>.`;
     feedback.className =
       "p-4 rounded-xl text-sm font-bold text-center bg-rose-50 text-rose-700 border border-rose-200";
   }
@@ -669,12 +669,12 @@ window.submitScrambleAnswer = (e) => {
       origin: { x: 0.9, y: 0.8 },
     });
 
-    feedback.textContent = "🥳 Tuyệt đỉnh! Con đã đoán đúng từ vựng cực nhanh!";
+    feedback.textContent = "🥳 Tuyệt đỉnh! Em đã đoán đúng từ vựng cực nhanh!";
     feedback.className =
       "p-4 rounded-xl text-sm font-bold text-center bg-emerald-50 text-emerald-700 border border-emerald-200";
   } else {
     window.studentState.gameWrongAnswers++;
-    feedback.innerHTML = `😢 Chưa chuẩn rồi con ơi! Từ vựng đúng của chúng ta là: <strong class="text-rose-700 font-mono text-base uppercase">${correctWord}</strong>.`;
+    feedback.innerHTML = `😢 Chưa chuẩn rồi em ơi! Từ vựng đúng của chúng ta là: <strong class="text-rose-700 font-mono text-base uppercase">${correctWord}</strong>.`;
     feedback.className =
       "p-4 rounded-xl text-sm font-bold text-center bg-rose-50 text-rose-700 border border-rose-200";
   }
@@ -704,7 +704,7 @@ window.submitScrambleTimeout = () => {
 
   const feedback = document.getElementById("scramble-feedback");
   feedback.classList.remove("hidden");
-  feedback.innerHTML = `⏰ Ôi hết thời gian rồi con ơi! Đáp án đúng là: <strong class="text-amber-800 uppercase font-mono">${correctWord}</strong>. Hãy thử sức tiếp câu sau nhé!`;
+  feedback.innerHTML = `⏰ Ôi hết thời gian rồi em ơi! Đáp án đúng là: <strong class="text-amber-800 uppercase font-mono">${correctWord}</strong>. Hãy thử sức tiếp câu sau nhé!`;
   feedback.className =
     "p-4 rounded-xl text-sm font-bold text-center bg-amber-50 text-amber-800 border border-amber-200";
 
@@ -833,7 +833,7 @@ window.submitFitbAnswer = (e) => {
     });
 
     feedback.textContent =
-      "🥳 Tuyệt vời! Con đã điền từ chuẩn xác để hoàn thiện câu ví dụ!";
+      "🥳 Tuyệt vời! Em đã điền từ chuẩn xác để hoàn thiện câu ví dụ!";
     feedback.className =
       "p-4 rounded-xl text-sm font-bold text-center bg-emerald-50 text-emerald-700 border border-emerald-200";
   } else {
@@ -841,7 +841,7 @@ window.submitFitbAnswer = (e) => {
     document.getElementById("fitb-wrong-count").textContent =
       window.studentState.gameWrongAnswers;
 
-    feedback.innerHTML = `😢 Chưa chính xác con ơi. Từ cần điền là: <strong class="text-rose-700 uppercase font-mono">${correctWord}</strong>.`;
+    feedback.innerHTML = `😢 Chưa chính xác em ơi. Từ cần điền là: <strong class="text-rose-700 uppercase font-mono">${correctWord}</strong>.`;
     feedback.className =
       "p-4 rounded-xl text-sm font-bold text-center bg-rose-50 text-rose-700 border border-rose-200";
   }
@@ -902,7 +902,7 @@ window.showGameReport = async (score, total) => {
   if (percent === 100) {
     titleEl.textContent = "🎉 Siêu Nhân Từ Vựng! 🎉";
     subtitleEl.textContent =
-      "Con đạt điểm tuyệt đối 100%! Trí nhớ của con thật sự vô song!";
+      "Em đạt điểm tuyệt đối 100%! Trí nhớ của em thật sự vô song!";
     badgeEl.textContent = "🏆 Thủ khoa Tiếng Anh Cô Hiền";
     badgeEl.className =
       "text-xs font-bold text-amber-700 bg-amber-50 px-3 py-1 rounded-full inline-block mt-3 border border-amber-200";
@@ -927,7 +927,7 @@ window.showGameReport = async (score, total) => {
       }
     })();
   } else if (percent >= 80) {
-    titleEl.textContent = "🌟 Xuất Sắc Quá Con Ơi! 🌟";
+    titleEl.textContent = "🌟 Xuất Sắc Quá Em Ơi! 🌟";
     subtitleEl.textContent =
       "Kỹ năng từ vựng cực kỳ tốt! Tiếp tục phát huy thế mạnh này nhé!";
     badgeEl.textContent = "🏅 Siêu sao Từ Vựng";
@@ -942,12 +942,12 @@ window.showGameReport = async (score, total) => {
   } else if (percent >= 50) {
     titleEl.textContent = "👍 Rất Tốt, Hãy Cố Gắng Thêm! 👍";
     subtitleEl.textContent =
-      "Con đã nhớ được kha khá từ vựng rồi. Chơi lại vài lần nữa là thuộc 100% luôn!";
+      "Em đã nhớ được kha khá từ vựng rồi. Chơi lại vài lần nữa là thuộc 100% luôn!";
     badgeEl.textContent = "🎖️ Học sinh hiếu học";
     badgeEl.className =
       "text-xs font-bold text-blue-700 bg-blue-50 px-3 py-1 rounded-full inline-block mt-3 border border-blue-200";
   } else {
-    titleEl.textContent = "💪 Đừng Nản Lòng Nhé Con! 💪";
+    titleEl.textContent = "💪 Đừng Nản Lòng Nhé Em! 💪";
     subtitleEl.textContent =
       "Học từ vựng cần có thời gian và sự kiên trì. Hãy lật Flashcard ôn lại một chút rồi thử thách lại nha!";
     badgeEl.textContent = "🌱 Chiến binh kiên cường";
@@ -1124,7 +1124,7 @@ window.startExam = async (examId) => {
       if (secondsLeft <= 0) {
         clearInterval(window.studentState.examTimerInterval);
         alert(
-          "Đã hết thời gian thi thử! Hệ thống sẽ tự động nộp bài thi của con.",
+          "Đã hết thời gian thi thử! Hệ thống sẽ tự động nộp bài thi của em.",
         );
         submitExam();
       }
@@ -1327,7 +1327,7 @@ window.selectOption = (questionOrder, answer) => {
 window.exitExam = () => {
   if (
     confirm(
-      "Con có chắc chắn muốn thoát khỏi bài thi? Quá trình làm bài sẽ không được lưu lại.",
+      "Em có chắc chắn muốn thoát khỏi bài thi? Quá trình làm bài sẽ không được lưu lại.",
     )
   ) {
     clearInterval(window.studentState.examTimerInterval);
@@ -1632,7 +1632,7 @@ document
         body: JSON.stringify({ question_text }),
       });
       input.value = "";
-      alert("Đã gửi câu hỏi thành công! Cô Hiền sẽ sớm trả lời con.");
+      alert("Đã gửi câu hỏi thành công! Cô Hiền sẽ sớm trả lời em.");
       window.loadStudentQna();
     } catch (err) {
       alert(err.message);
@@ -1649,14 +1649,14 @@ document
 window.analyzeStudentWriting = async () => {
   const text = document.getElementById("student-writing-text").value.trim();
   if (!text) {
-    alert("Con vui lòng dán một bài luận hoặc văn bản trước nhé!");
+    alert("Em vui lòng dán một bài luận hoặc văn bản trước nhé!");
     return;
   }
 
   const btn = document.getElementById("btn-analyze-writing");
   const originText = btn.innerHTML;
   btn.disabled = true;
-  btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Cô đang đọc và phân tích bài luận cho con nhé...`;
+  btn.innerHTML = `<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full mr-2"></span> Cô đang đọc và phân tích bài luận cho em nhé...`;
 
   const placeholder = document.getElementById(
     "writing-analysis-result-placeholder",
