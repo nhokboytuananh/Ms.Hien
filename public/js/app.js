@@ -122,9 +122,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const regClassSelect = document.getElementById('reg-class');
     if (!regClassSelect) return;
     try {
-      const res = await fetch('/api/auth/public-classes');
-      if (!res.ok) throw new Error('Không thể tải danh sách lớp.');
-      const classes = await res.json();
+      const classes = await apiFetch('/api/auth/public-classes');
       
       regClassSelect.innerHTML = '';
       if (classes.length === 0) {
