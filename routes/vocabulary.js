@@ -102,6 +102,39 @@ router.post("/vocabulary", requireAuth, requireTeacher, async (req, res) => {
 });
 
 /**
+ * @route GET /api/vocabulary/download-template
+ * @desc Tải file Excel mẫu thêm từ vựng
+ */
+router.get("/vocabulary/download-template", (req, res) => {
+  try {
+    const wb = xlsx.utils.book_new();
+    const ws = xlsx.utils.aoa_to_sheet([
+      ["Từ vựng", "Phát âm", "Nghĩa tiếng Việt", "Ví dụ tiếng Anh", "Khối"],
+      ["hello", "/həˈləʊ/", "xin chào", "Hello everyone!", "10"],
+      ["ubiquitous", "/juːˈbɪkwɪtəs/", "Khắp mọi nơi, phổ biến", "Mobile phones are ubiquitous in our daily lives.", "10"]
+    ]);
+
+    ws["!cols"] = [
+      { wch: 15 }, // Từ vựng
+      { wch: 20 }, // Phát âm
+      { wch: 25 }, // Nghĩa tiếng Việt
+      { wch: 45 }, // Ví dụ tiếng Anh
+      { wch: 10 }  // Khối
+    ];
+
+    xlsx.utils.book_append_sheet(wb, ws, "Vocabulary");
+    const buf = xlsx.write(wb, { type: "buffer", bookType: "xlsx" });
+
+    res.setHeader("Content-Disposition", "attachment; filename=Mau_Nhap_Tu_Vung.xlsx");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+    res.send(buf);
+  } catch (error) {
+    console.error("Lỗi khi tải file template:", error);
+    res.status(500).json({ error: "Lỗi tạo file mẫu: " + error.message });
+  }
+});
+
+/**
  * @route PUT /api/vocabulary/:id
  * @desc Sửa đổi thông tin từ vựng (Chỉ dành cho Giáo viên)
  */
