@@ -233,16 +233,16 @@ router.post(
 
       let count = 0;
       for (const v of result) {
+        const exampleText = v.example_en ? `${v.example_en} (${v.example_vi || ''})` : "";
         await db.query(
           `INSERT INTO vocabulary 
-         (word, pronunciation, meaning_vi, example_en, example_vi, grade, created_by)
-         VALUES ($1, $2, $3, $4, $5, $6, $7)`,
+         (word, ipa, meaning_vi, example, grade, created_by)
+         VALUES ($1, $2, $3, $4, $5, $6)`,
           [
             v.word || "",
             v.pronunciation || "",
             v.meaning_vi || "",
-            v.example_en || "",
-            v.example_vi || "",
+            exampleText,
             Number(grade),
             req.user.id,
           ],
@@ -327,7 +327,7 @@ router.post(
 
         await db.query(
           `INSERT INTO vocabulary 
-         (word, pronunciation, meaning_vi, example_en, grade, created_by)
+         (word, ipa, meaning_vi, example, grade, created_by)
          VALUES ($1, $2, $3, $4, $5, $6)`,
           [word, pronunciation, meaning_vi, example_en, grade, req.user.id],
         );
