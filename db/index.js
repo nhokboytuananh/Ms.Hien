@@ -243,6 +243,23 @@ if (isProduction) {
         `);
         console.log('--- ĐÃ TẠO TÀI KHOẢN GIÁO VIÊN MẶC ĐỊNH ---');
       } else {
+        // Kiểm tra xem bảng game_results đã tồn tại chưa để tránh lỗi cho các db đã chạy trước đó
+        const checkGameResults = await pool.query("SELECT to_regclass('public.game_results') as table_exists");
+        if (!checkGameResults.rows[0].table_exists) {
+          console.log('--- KHÔNG TÌM THẤY BẢNG GAME_RESULTS, ĐANG TỰ ĐỘNG TẠO ---');
+          await pool.query(`
+            CREATE TABLE IF NOT EXISTS game_results (
+              id SERIAL PRIMARY KEY,
+              student_id INT REFERENCES users(id) ON DELETE CASCADE,
+              score INT NOT NULL,
+              time_spent INT NOT NULL,
+              game_type VARCHAR(50) DEFAULT 'unknown',
+              created_at TIMESTAMP DEFAULT NOW()
+            );
+          `);
+          console.log('--- ĐÃ TẠO BẢNG GAME_RESULTS THÀNH CÔNG ---');
+        }
+
         // Nếu đã có bảng, chỉ đồng bộ thông tin giáo viên mặc định
         await pool.query(`
           UPDATE users 
@@ -843,12 +860,14 @@ if (isProduction) {
       // 29. SELECT count(g.id) FROM game_results g JOIN users u
       if (queryStr.match(/game_results/i) && queryStr.match(/count\(g\.id\)/i)) {
         if (!data.game_results) data.game_results = [];
+        const filterType = (queryStr.match(/game_type\s*=\s*\$1/i) && params && params.length > 0) ? params[0] : null;
         const counts = {};
         for (const g of data.game_results) {
+          if (filterType && g.game_type !== filterType) continue;
           counts[g.student_id] = (counts[g.student_id] || 0) + 1;
         }
         const rows = Object.keys(counts).map(uid => {
-          const u = data.users.find(user => user.id === Number(uid));
+          const u = data.users.find(user => Number(user.id) === Number(uid));
           return {
             full_name: u ? u.full_name : 'Học sinh ẩn danh',
             play_count: counts[uid]
@@ -861,8 +880,13 @@ if (isProduction) {
       // 30. SELECT g.score, g.time_spent FROM game_results g JOIN users u
       if (queryStr.match(/game_results/i) && queryStr.match(/order\s+by\s+g\.score/i)) {
         if (!data.game_results) data.game_results = [];
-        const rows = data.game_results.map(g => {
-          const u = data.users.find(user => user.id === g.student_id);
+        const filterType = (queryStr.match(/game_type\s*=\s*\$1/i) && params && params.length > 0) ? params[0] : null;
+        const filteredResults = filterType
+          ? data.game_results.filter(g => g.game_type === filterType)
+          : data.game_results;
+
+        const rows = filteredResults.map(g => {
+          const u = data.users.find(user => Number(user.id) === Number(g.student_id));
           return {
             full_name: u ? u.full_name : 'Học sinh ẩn danh',
             score: g.score,
