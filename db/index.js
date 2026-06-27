@@ -21,7 +21,7 @@ const DB_FILE_PATH = path.join(process.cwd(), 'db', 'local_db.json');
 // Dữ liệu mẫu (Seed Data) dùng để khởi tạo cho môi trường local
 const INITIAL_SEED_DATA = {
   users: [
-    { id: 1, full_name: 'Ms. Hien', email: 'teacher', password_hash: '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG', role: 'teacher', class_name: null, created_at: new Date() },
+    { id: 1, full_name: 'Ms. Hien', email: 'teacher', password_hash: '$2b$10$L9CIaPdQYjmXpTS35VcmWOxx1yCRBqYNiPYR1okQ5aJriYWtML5xu', role: 'teacher', class_name: null, created_at: new Date() },
     { id: 2, full_name: 'Nguyễn Văn An', email: 'hs1@10a1.com', password_hash: '$2b$10$6LYxQ2jqsQ04a.VBLgdCM.hM3rlE.ij3o1uhtmpFyGW/Wonrwxhee', role: 'student', class_name: '10A1', created_at: new Date() },
     { id: 3, full_name: 'Trần Thị Bình', email: 'hs2@10a1.com', password_hash: '$2b$10$6LYxQ2jqsQ04a.VBLgdCM.hM3rlE.ij3o1uhtmpFyGW/Wonrwxhee', role: 'student', class_name: '10A1', created_at: new Date() },
     { id: 4, full_name: 'Lê Hoàng Cường', email: 'hs3@10a1.com', password_hash: '$2b$10$6LYxQ2jqsQ04a.VBLgdCM.hM3rlE.ij3o1uhtmpFyGW/Wonrwxhee', role: 'student', class_name: '10A1', created_at: new Date() },
@@ -180,8 +180,8 @@ function loadLocalData() {
         teacherUser.email = 'teacher';
         changed = true;
       }
-      if (teacherUser.password_hash === '$2b$10$6LYxQ2jqsQ04a.VBLgdCM.hM3rlE.ij3o1uhtmpFyGW/Wonrwxhee') {
-        teacherUser.password_hash = '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG'; // 1234567
+      if (teacherUser.password_hash === '$2b$10$6LYxQ2jqsQ04a.VBLgdCM.hM3rlE.ij3o1uhtmpFyGW/Wonrwxhee' || teacherUser.password_hash === '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG') {
+        teacherUser.password_hash = '$2b$10$L9CIaPdQYjmXpTS35VcmWOxx1yCRBqYNiPYR1okQ5aJriYWtML5xu'; // 1234567
         changed = true;
       }
       if (changed) {
@@ -235,14 +235,14 @@ if (isProduction) {
         // Seed default teacher
         await pool.query(`
           INSERT INTO users (full_name, email, password_hash, role) 
-          VALUES ('Ms. Hien', 'teacher', '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG', 'teacher')
+          VALUES ('Ms. Hien', 'teacher', '$2b$10$L9CIaPdQYjmXpTS35VcmWOxx1yCRBqYNiPYR1okQ5aJriYWtML5xu', 'teacher')
         `);
         console.log('--- ĐÃ TẠO TÀI KHOẢN GIÁO VIÊN MẶC ĐỊNH ---');
       } else {
         // Nếu đã có bảng, chỉ đồng bộ thông tin giáo viên mặc định
         await pool.query(`
           UPDATE users 
-          SET email = 'teacher', password_hash = '$2a$10$r6SWeLhWpG3h7E5PizvD2OKt.i2gZshK/37E6gqZ/6K8.g0bHymhG' 
+          SET email = 'teacher', password_hash = '$2b$10$L9CIaPdQYjmXpTS35VcmWOxx1yCRBqYNiPYR1okQ5aJriYWtML5xu' 
           WHERE role = 'teacher' OR id = 1
         `);
         console.log('--- ĐÃ ĐỒNG BỘ TÀI KHOẢN GIÁO VIÊN MẶC ĐỊNH TRONG POSTGRESQL THÀNH CÔNG ---');
