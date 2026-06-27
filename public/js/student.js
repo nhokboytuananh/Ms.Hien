@@ -883,8 +883,10 @@ window.showGameReport = async (score, total) => {
         game_type: window.studentState.gameType,
       }),
     });
-    // Cập nhật bảng xếp hạng ngay lập tức
-    if (typeof window.loadGameLeaderboards === "function") {
+    // Tự động chuyển tab bảng xếp hạng sang trò chơi vừa chơi xong để cập nhật & xem ngay lập tức
+    if (typeof window.selectLeaderboardTab === "function") {
+      window.selectLeaderboardTab(window.studentState.gameType);
+    } else if (typeof window.loadGameLeaderboards === "function") {
       window.loadGameLeaderboards();
     }
   } catch (err) {
@@ -960,9 +962,31 @@ window.showGameReport = async (score, total) => {
   };
 };
 
+window.activeLeaderboardTab = "all";
+
+window.selectLeaderboardTab = async (tab) => {
+  window.activeLeaderboardTab = tab || "all";
+  
+  // Cập nhật phong cách nút tab hoạt động
+  const tabs = ["all", "quiz", "scramble", "fitb"];
+  tabs.forEach((t) => {
+    const btn = document.getElementById(`tab-lb-${t}`);
+    if (btn) {
+      if (t === window.activeLeaderboardTab) {
+        btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer bg-white text-brand-700 shadow-sm border border-slate-200/50";
+      } else {
+        btn.className = "px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-slate-600 hover:text-slate-800";
+      }
+    }
+  });
+
+  await window.loadGameLeaderboards();
+};
+
 window.loadGameLeaderboards = async () => {
   try {
-    const data = await window.apiFetch("/api/game-leaderboards");
+    const tab = window.activeLeaderboardTab || "all";
+    const data = await window.apiFetch(`/api/game-leaderboards?game_type=${tab}`);
 
     const playedUl = document.getElementById("leaderboard-played");
     const scoreUl = document.getElementById("leaderboard-score");
@@ -984,7 +1008,7 @@ window.loadGameLeaderboards = async () => {
           .join("");
       } else {
         playedUl.innerHTML =
-          '<li class="px-4 py-8 text-center text-slate-400 text-sm font-medium">Chưa có dữ liệu.</li>';
+          '<li class="px-4 py-8 text-center text-slate-400 text-sm font-medium">Chưa có lượt chơi nào trong mục này.</li>';
       }
     }
 
@@ -1008,7 +1032,7 @@ window.loadGameLeaderboards = async () => {
           .join("");
       } else {
         scoreUl.innerHTML =
-          '<li class="px-4 py-8 text-center text-slate-400 text-sm font-medium">Chưa có dữ liệu.</li>';
+          '<li class="px-4 py-8 text-center text-slate-400 text-sm font-medium">Chưa có điểm số nào được ghi nhận.</li>';
       }
     }
   } catch (err) {

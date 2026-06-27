@@ -1267,59 +1267,87 @@
                   </div>
 
                   <!-- BẢNG XẾP HẠNG GAME -->
-                  <div
-                    class="grid grid-cols-1 md:grid-cols-2 gap-6 pt-6 mt-8 border-t border-slate-200"
-                  >
-                    <div
-                      class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"
-                    >
-                      <div
-                        class="bg-indigo-50 px-4 py-3 border-b border-indigo-100 flex items-center gap-2"
-                      >
-                        <i
-                          data-lucide="flame"
-                          class="w-5 h-5 text-indigo-600"
-                        ></i>
-                        <h4 class="font-bold text-indigo-900 text-sm">
-                          Top 5 Chăm Chỉ Nhất (Lượt chơi)
-                        </h4>
+                  <div class="mt-10 border-t border-slate-200 pt-8">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
+                      <div>
+                        <h3 class="font-extrabold text-slate-800 text-lg flex items-center gap-2">
+                          <i data-lucide="award" class="w-6 h-6 text-amber-500"></i>
+                          Bảng Xếp Hạng Đấu Trường
+                        </h3>
+                        <p class="text-[11px] text-slate-500 font-medium">Thành tích học tập & rèn luyện của các con</p>
                       </div>
-                      <ul
-                        id="leaderboard-played"
-                        class="divide-y divide-slate-100 flex-1 p-2"
-                      >
-                        <li
-                          class="px-4 py-8 text-center text-slate-400 text-sm font-medium"
-                        >
-                          Đang tải bảng xếp hạng...
-                        </li>
-                      </ul>
+                      
+                      <!-- Tabs Lọc Trò Chơi -->
+                      <div class="flex flex-wrap gap-1 p-1 bg-slate-100/80 rounded-xl border border-slate-200/50 max-w-max">
+                        <button onclick="window.selectLeaderboardTab('all')" id="tab-lb-all" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer bg-white text-brand-700 shadow-sm border border-slate-200/50">
+                          Tất cả
+                        </button>
+                        <button onclick="window.selectLeaderboardTab('quiz')" id="tab-lb-quiz" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-slate-600 hover:text-slate-800">
+                          Word Quiz
+                        </button>
+                        <button onclick="window.selectLeaderboardTab('scramble')" id="tab-lb-scramble" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-slate-600 hover:text-slate-800">
+                          Word Scramble
+                        </button>
+                        <button onclick="window.selectLeaderboardTab('fitb')" id="tab-lb-fitb" class="px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer text-slate-600 hover:text-slate-800">
+                          Fill in Blank
+                        </button>
+                      </div>
                     </div>
 
                     <div
-                      class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"
+                      class="grid grid-cols-1 md:grid-cols-2 gap-6"
                     >
                       <div
-                        class="bg-amber-50 px-4 py-3 border-b border-amber-100 flex items-center gap-2"
+                        class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"
                       >
-                        <i
-                          data-lucide="trophy"
-                          class="w-5 h-5 text-amber-600"
-                        ></i>
-                        <h4 class="font-bold text-amber-900 text-sm">
-                          Top 5 Xuất Sắc Nhất (Điểm số & Thời gian)
-                        </h4>
-                      </div>
-                      <ul
-                        id="leaderboard-score"
-                        class="divide-y divide-slate-100 flex-1 p-2"
-                      >
-                        <li
-                          class="px-4 py-8 text-center text-slate-400 text-sm font-medium"
+                        <div
+                          class="bg-indigo-50 px-4 py-3 border-b border-indigo-100 flex items-center gap-2"
                         >
-                          Đang tải bảng xếp hạng...
-                        </li>
-                      </ul>
+                          <i
+                            data-lucide="flame"
+                            class="w-5 h-5 text-indigo-600"
+                          ></i>
+                          <h4 class="font-bold text-indigo-900 text-sm">
+                            Top 5 Chăm Chỉ Nhất (Lượt chơi)
+                          </h4>
+                        </div>
+                        <ul
+                          id="leaderboard-played"
+                          class="divide-y divide-slate-100 flex-1 p-2"
+                        >
+                          <li
+                            class="px-4 py-8 text-center text-slate-400 text-sm font-medium"
+                          >
+                            Đang tải bảng xếp hạng...
+                          </li>
+                        </ul>
+                      </div>
+
+                      <div
+                        class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col"
+                      >
+                        <div
+                          class="bg-amber-50 px-4 py-3 border-b border-amber-100 flex items-center gap-2"
+                        >
+                          <i
+                            data-lucide="trophy"
+                            class="w-5 h-5 text-amber-600"
+                          ></i>
+                          <h4 class="font-bold text-amber-900 text-sm">
+                            Top 5 Xuất Sắc Nhất (Điểm số & Thời gian)
+                          </h4>
+                        </div>
+                        <ul
+                          id="leaderboard-score"
+                          class="divide-y divide-slate-100 flex-1 p-2"
+                        >
+                          <li
+                            class="px-4 py-8 text-center text-slate-400 text-sm font-medium"
+                          >
+                            Đang tải bảng xếp hạng...
+                          </li>
+                        </ul>
+                      </div>
                     </div>
                   </div>
                 </div>
