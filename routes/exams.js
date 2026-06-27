@@ -179,6 +179,312 @@ router.get('/exams/:id', requireAuth, async (req, res) => {
 });
 
 /**
+ * @route GET /api/exams/:id/export-word
+ * @desc Xuất đề thi ra file Word (.doc) (Chỉ dành cho Giáo viên)
+ */
+router.get('/exams/:id/export-word', requireAuth, requireTeacher, async (req, res) => {
+  const { id } = req.params;
+
+  try {
+    // 1. Lấy thông tin đề thi
+    const examRes = await db.query('SELECT * FROM exams WHERE id = $1', [Number(id)]);
+    if (examRes.rows.length === 0) {
+      return res.status(404).send('<h1>Đề thi không tồn tại.</h1>');
+    }
+    const exam = examRes.rows[0];
+
+    // 2. Lấy danh sách câu hỏi
+    const questionsRes = await db.query(
+      'SELECT * FROM exam_questions WHERE exam_id = $1 ORDER BY question_order ASC',
+      [Number(id)]
+    );
+    const questions = questionsRes.rows;
+
+    if (questions.length === 0) {
+      return res.status(404).send('<h1>Đề thi chưa có câu hỏi nào để xuất bản.</h1>');
+    }
+
+    // 3. Nhóm câu hỏi theo bài đọc hiểu (giống client side)
+    const grouped = [];
+    let currentPassage = null;
+    let currentGroup = null;
+
+    questions.forEach((q, idx) => {
+      const qNum = idx + 1;
+      if (q.question_text && q.question_text.startsWith('[READING_PASSAGE]')) {
+        const parts = q.question_text
+          .substring('[READING_PASSAGE]'.length)
+          .split('|||');
+        const passage = parts[0] || '';
+        const subQuestionText = parts.slice(1).join('|||') || '';
+
+        if (currentPassage === passage && currentGroup) {
+          currentGroup.subQuestions.push({
+            ...q,
+            original_num: qNum,
+            question_text: subQuestionText
+          });
+        } else {
+          currentPassage = passage;
+          currentGroup = {
+            type: 'reading_group',
+            passage: passage,
+            part: q.part || 'Đọc hiểu',
+            subQuestions: [
+              {
+                ...q,
+                original_num: qNum,
+                question_text: subQuestionText
+              }
+            ]
+          };
+          grouped.push(currentGroup);
+        }
+      } else {
+        currentPassage = null;
+        currentGroup = null;
+        grouped.push({
+          type: 'single',
+          original_num: qNum,
+          ...q
+        });
+      }
+    });
+
+    // 4. Tạo mã HTML cho câu hỏi
+    let htmlQuestions = '';
+    grouped.forEach((g) => {
+      if (g.type === 'single') {
+        htmlQuestions += `
+          <div class="question-item">
+            <span class="question-header">Câu ${g.original_num}:</span> ${g.question_text}
+            <table class="options-grid">
+              <tr>
+                <td><strong>A.</strong> ${g.option_a || ''}</td>
+                <td><strong>B.</strong> ${g.option_b || ''}</td>
+                <td><strong>C.</strong> ${g.option_c || ''}</td>
+                <td><strong>D.</strong> ${g.option_d || ''}</td>
+              </tr>
+            </table>
+          </div>
+        `;
+      } else if (g.type === 'reading_group') {
+        htmlQuestions += `
+          <div class="passage-box">
+            <strong>Read the following passage and mark the letter A, B, C, or D on your answer sheet to indicate the correct answer to each of the questions:</strong><br><br>
+            ${g.passage.replace(/\n/g, '<br>')}
+          </div>
+        `;
+        g.subQuestions.forEach((subQ) => {
+          htmlQuestions += `
+            <div class="question-item">
+              <span class="question-header">Câu ${subQ.original_num}:</span> ${subQ.question_text}
+              <table class="options-grid">
+                <tr>
+                  <td><strong>A.</strong> ${subQ.option_a || ''}</td>
+                  <td><strong>B.</strong> ${subQ.option_b || ''}</td>
+                  <td><strong>C.</strong> ${subQ.option_c || ''}</td>
+                  <td><strong>D.</strong> ${subQ.option_d || ''}</td>
+                </tr>
+              </table>
+            </div>
+          `;
+        });
+      }
+    });
+
+    // 5. Tạo bảng đáp án Answer Key (chia thành 5 cột gọn gàng)
+    const colsCount = 5;
+    const rowsCount = Math.ceil(questions.length / colsCount);
+    
+    let answerKeyGridHtml = '<table class="answer-key-table"><thead><tr>';
+    for (let c = 0; c < colsCount; c++) {
+      answerKeyGridHtml += `<th>Câu hỏi</th><th>Đáp án</th>`;
+    }
+    answerKeyGridHtml += '</tr></thead><tbody>';
+    
+    for (let r = 0; r < rowsCount; r++) {
+      answerKeyGridHtml += '<tr>';
+      for (let c = 0; c < colsCount; c++) {
+        const qIdx = r + c * rowsCount;
+        if (qIdx < questions.length) {
+          const q = questions[qIdx];
+          answerKeyGridHtml += `<td><strong>Câu ${q.question_order}</strong></td><td style="color: #059669; font-weight: bold; text-align: center;">${q.correct_answer || 'A'}</td>`;
+        } else {
+          answerKeyGridHtml += `<td></td><td></td>`;
+        }
+      }
+      answerKeyGridHtml += '</tr>';
+    }
+    answerKeyGridHtml += '</tbody></table>';
+
+    // 6. Tạo danh sách hướng dẫn giải chi tiết
+    let htmlExplanations = '';
+    questions.forEach((q) => {
+      htmlExplanations += `
+        <div class="explanation-item">
+          <strong>Câu ${q.question_order}:</strong> Chọn <strong>${q.correct_answer || 'A'}</strong><br>
+          <span style="color: #4b5563;">Giải thích: ${q.explanation || 'Chưa có giải thích chi tiết.'}</span>
+        </div>
+      `;
+    });
+
+    // 7. Tạo toàn bộ tệp HTML hoàn chỉnh tương thích Word
+    const fileContent = `
+<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+<head>
+  <meta charset="utf-8">
+  <title>${exam.title}</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 1in;
+    }
+    body {
+      font-family: 'Times New Roman', Times, serif;
+      font-size: 11pt;
+      line-height: 1.25;
+      color: #000000;
+    }
+    .header-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 20px;
+    }
+    .header-table td {
+      border: none;
+      padding: 0;
+      vertical-align: top;
+    }
+    .title-section {
+      text-align: center;
+      margin-top: 15px;
+      margin-bottom: 25px;
+    }
+    .exam-title {
+      font-size: 13pt;
+      font-weight: bold;
+      text-transform: uppercase;
+      margin-bottom: 5px;
+    }
+    .exam-meta {
+      font-size: 10.5pt;
+      font-style: italic;
+    }
+    .divider {
+      border-top: 1.5px solid #000000;
+      margin-top: 10px;
+      margin-bottom: 20px;
+    }
+    .passage-box {
+      border: 1px dashed #000000;
+      background-color: #fcfcfc;
+      padding: 8px;
+      margin-top: 10px;
+      margin-bottom: 15px;
+    }
+    .question-item {
+      margin-bottom: 12px;
+    }
+    .question-header {
+      font-weight: bold;
+    }
+    .options-grid {
+      width: 100%;
+      margin-top: 3px;
+      margin-bottom: 8px;
+    }
+    .options-grid td {
+      width: 25%;
+      padding: 1px 0;
+      vertical-align: top;
+    }
+    .page-break {
+      page-break-before: always;
+    }
+    .section-heading {
+      font-size: 12pt;
+      font-weight: bold;
+      margin-top: 25px;
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      text-align: center;
+    }
+    .answer-key-table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-top: 15px;
+      margin-bottom: 25px;
+    }
+    .answer-key-table th, .answer-key-table td {
+      border: 1px solid #000000;
+      padding: 5px;
+    }
+    .answer-key-table th {
+      background-color: #f3f4f6;
+      font-weight: bold;
+      text-align: center;
+    }
+    .explanation-item {
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f3f4f6;
+      padding-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+  <table class="header-table">
+    <tr>
+      <td style="width: 50%; text-align: center;">
+        <span style="font-weight: bold; font-size: 11pt;">SỞ GIÁO DỤC VÀ ĐÀO TẠO</span><br>
+        <span style="font-weight: bold; font-size: 11pt; text-decoration: underline;">KỲ THI THỬ THPT QUỐC GIA</span>
+      </td>
+      <td style="width: 50%; text-align: center;">
+        <span style="font-weight: bold; font-size: 11pt;">ĐỀ THI CHÍNH THỨC</span><br>
+        <span style="font-style: italic; font-size: 11pt;">(Đề thi gồm có ${questions.length} câu trắc nghiệm)</span>
+      </td>
+    </tr>
+  </table>
+
+  <div class="title-section">
+    <div class="exam-title">${exam.title}</div>
+    <div class="exam-meta">
+      Thời gian làm bài: ${exam.duration_minutes} phút | Khối: ${exam.grade}<br>
+      Mã đề thi: 101 - Mức độ: ${exam.difficulty === 'hard' ? 'Khó' : 'Trung bình'}
+    </div>
+  </div>
+  
+  <div class="divider"></div>
+
+  ${htmlQuestions}
+
+  <!-- PAGE BREAK FOR ANSWER KEY & EXPLANATIONS -->
+  <div class="page-break"></div>
+  
+  <div class="section-heading">ĐÁP ÁN ĐỀ THI: ${exam.title}</div>
+  ${answerKeyGridHtml}
+
+  <div class="section-heading" style="text-align: left; border-bottom: 1px solid #000000; padding-bottom: 5px; margin-top: 30px;">HƯỚNG DẪN GIẢI CHI TIẾT</div>
+  <div style="margin-top: 15px;">
+    ${htmlExplanations}
+  </div>
+</body>
+</html>
+`;
+
+    // 8. Đặt các header tải file
+    res.setHeader('Content-Disposition', `attachment; filename="${encodeURIComponent(exam.title)}.doc"`);
+    res.setHeader('Content-Type', 'application/msword; charset=utf-8');
+    // Gửi kèm BOM UTF-8 (\uFEFF) để Word hiển thị dấu tiếng Việt hoàn hảo
+    res.send('\uFEFF' + fileContent);
+
+  } catch (error) {
+    console.error('Lỗi khi xuất đề thi ra Word:', error);
+    res.status(500).send('<h1>Lỗi khi xuất đề thi ra Word: ' + error.message + '</h1>');
+  }
+});
+
+/**
  * @route POST /api/exams
  * @desc Tạo một đề thi thủ công hoàn chỉnh (Chỉ dành cho Giáo viên)
  */
