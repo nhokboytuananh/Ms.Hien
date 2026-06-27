@@ -1216,101 +1216,95 @@ window.backToExamList = () => {
 
 
 // ==========================================
-// 4. HỎI ĐÁP CÔ HIỀN (AI CHATBOT)
+// 4. HỎI ĐÁP CÔ HIỀN (Q&A BOARD)
 // ==========================================
 
-window.clearChat = () => {
-  const box = document.getElementById('chat-messages-box');
-  box.innerHTML = `
-    <div class="flex items-start gap-3">
-      <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm shrink-0">
-        👩‍🏫
-      </div>
-      <div class="bg-white p-3.5 rounded-2xl rounded-tl-none shadow-sm text-sm border border-slate-100 max-w-[80%]">
-        Hello con! Rất vui được gặp con trong phòng học của Cô Hiền. 💖 Con có câu hỏi nào về từ vựng, ngữ pháp hay phát âm không? Đừng ngần ngại hỏi cô nhé, *practice makes perfect*!
-      </div>
-    </div>
-  `;
+window.loadStudentQna = async () => {
+  const container = document.getElementById('s-qna-list');
+  try {
+    const list = await window.apiFetch('/api/qna');
+    if (list.length === 0) {
+      container.innerHTML = '<div class="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200">Con chưa có câu hỏi nào. Đừng ngại hỏi Cô Hiền nhé!</div>';
+      return;
+    }
+    
+    container.innerHTML = list.map(q => {
+      let answerHtml = '';
+      if (q.status === 'ai_answered' && q.ai_answer) {
+        answerHtml = `
+          <div class="mt-4 p-4 bg-brand-50 rounded-xl border border-brand-100 flex gap-3">
+            <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm shrink-0">👩‍🏫</div>
+            <div class="text-sm text-slate-800 leading-relaxed"><strong class="text-brand-700 block mb-1">Cô Hiền (AI):</strong>${q.ai_answer.replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      } else if (q.status === 'teacher_answered' && q.teacher_answer) {
+        answerHtml = `
+          <div class="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex gap-3">
+            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm shrink-0">👩‍🏫</div>
+            <div class="text-sm text-slate-800 leading-relaxed"><strong class="text-emerald-700 block mb-1">Cô Hiền:</strong>${q.teacher_answer.replace(/\n/g, '<br>')}</div>
+          </div>
+        `;
+      } else {
+         answerHtml = `
+          <div class="mt-4 text-xs text-amber-600 bg-amber-50 px-3 py-2 rounded-lg inline-flex items-center gap-2">
+            <i data-lucide="clock" class="w-4 h-4"></i> Đang chờ Cô Hiền trả lời...
+          </div>
+          <button onclick="requestAiAnswer(${q.id})" class="mt-2 text-xs text-brand-600 hover:underline flex items-center gap-1">
+            <i data-lucide="bot" class="w-3 h-3"></i> Nhờ AI trả lời ngay
+          </button>
+         `;
+      }
+      
+      return `
+        <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm">
+          <div class="text-sm text-slate-600 mb-2 font-medium">Câu hỏi của con:</div>
+          <div class="text-slate-900 bg-slate-50 p-3 rounded-lg border border-slate-100">${q.question_text.replace(/\n/g, '<br>')}</div>
+          ${answerHtml}
+        </div>
+      `;
+    }).join('');
+    
+    if(window.lucide) window.lucide.createIcons();
+  } catch (err) {
+    container.innerHTML = `<div class="p-8 text-center text-red-500 bg-red-50 rounded-xl border border-red-200">Lỗi: ${err.message}</div>`;
+  }
 };
 
-document.getElementById('chat-input-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  const msgInput = document.getElementById('chat-input-msg');
-  const message = msgInput.value.trim();
-  if (!message) return;
-
-  const box = document.getElementById('chat-messages-box');
-
-  // 1. Gắn bóng chat của học sinh
-  const userDiv = document.createElement('div');
-  userDiv.className = 'flex items-start gap-3 justify-end';
-  userDiv.innerHTML = `
-    <div class="bg-brand-600 text-white p-3.5 rounded-2xl rounded-tr-none shadow-sm text-sm max-w-[80%]">
-      ${message}
-    </div>
-    <div class="w-8 h-8 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-sm font-bold shrink-0">
-      Con
-    </div>
-  `;
-  box.appendChild(userDiv);
-  box.scrollTop = box.scrollHeight;
-  msgInput.value = '';
-
-  // Thu thập lịch sử chat (tối đa 6 câu gần nhất để tối ưu hoá bộ nhớ)
-  const bubbles = box.querySelectorAll('.flex');
-  const chat_history = [];
-  bubbles.forEach(b => {
-    const isUser = b.classList.contains('justify-end');
-    const text = b.querySelector('div:not(.rounded-full)').textContent.trim();
-    chat_history.push({ role: isUser ? 'user' : 'model', text });
-  });
-
-  // Trình gõ chữ nhấp nháy tạo hiệu ứng AI đang chuẩn bị viết bài
-  const typingDiv = document.createElement('div');
-  typingDiv.className = 'flex items-start gap-3';
-  typingDiv.innerHTML = `
-    <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm shrink-0">👩‍🏫</div>
-    <div class="bg-white p-3.5 rounded-2xl rounded-tl-none shadow-sm text-sm border border-slate-100 max-w-[80%] flex items-center gap-1.5 text-slate-400">
-      <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></span>
-      <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></span>
-      <span class="w-2 h-2 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></span>
-    </div>
-  `;
-  box.appendChild(typingDiv);
-  box.scrollTop = box.scrollHeight;
-
+window.requestAiAnswer = async (questionId) => {
   try {
-    const res = await window.apiFetch('/api/ai/chat', {
-      method: 'POST',
-      body: JSON.stringify({ message, chat_history: chat_history.slice(-6) })
-    });
-
-    // Gỡ hiệu ứng gõ chữ, thay bằng tin nhắn chính thức của cô
-    box.removeChild(typingDiv);
-
-    const teacherDiv = document.createElement('div');
-    teacherDiv.className = 'flex items-start gap-3';
-    
-    // Format text sơ bộ (thay thế dòng mới bằng <br> và đổi markdown *bold* sang <strong>)
-    const formattedReply = res.reply
-      .replace(/\n/g, '<br>')
-      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.*?)\*/g, '<em>$1</em>');
-
-    teacherDiv.innerHTML = `
-      <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm shrink-0">
-        👩‍🏫
-      </div>
-      <div class="bg-white p-3.5 rounded-2xl rounded-tl-none shadow-sm text-sm border border-slate-100 max-w-[80%] leading-relaxed">
-        ${formattedReply}
-      </div>
-    `;
-    box.appendChild(teacherDiv);
-    box.scrollTop = box.scrollHeight;
-
+    alert('AI đang suy nghĩ câu trả lời...');
+    await window.apiFetch(`/api/qna/${questionId}/ai-answer`, { method: 'POST' });
+    alert('AI đã trả lời thành công!');
+    window.loadStudentQna();
   } catch (err) {
-    box.removeChild(typingDiv);
     alert(err.message);
+  }
+};
+
+document.getElementById('qna-input-form')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const input = document.getElementById('qna-input-msg');
+  const question_text = input.value.trim();
+  if (!question_text) return;
+  
+  const btn = e.target.querySelector('button');
+  const originalHtml = btn.innerHTML;
+  btn.innerHTML = 'Đang gửi...';
+  btn.disabled = true;
+  
+  try {
+    await window.apiFetch('/api/qna', {
+      method: 'POST',
+      body: JSON.stringify({ question_text })
+    });
+    input.value = '';
+    alert('Đã gửi câu hỏi thành công! Cô Hiền sẽ sớm trả lời con.');
+    window.loadStudentQna();
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    btn.innerHTML = originalHtml;
+    btn.disabled = false;
   }
 });
 

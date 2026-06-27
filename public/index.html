@@ -257,6 +257,9 @@
           <button data-tab="t-exams" class="nav-btn flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all w-full text-left">
             <i data-lucide="sparkles" class="w-5 h-5"></i> Đề thi & Công cụ AI
           </button>
+          <button data-tab="t-qna" class="nav-btn flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all w-full text-left">
+            <i data-lucide="message-circle-question" class="w-5 h-5"></i> Hỏi đáp của học sinh
+          </button>
         </nav>
 
         <!-- TIÊU ĐỀ MENU CHO HỌC SINH -->
@@ -563,6 +566,22 @@
                   </tbody>
                 </table>
               </div>
+            </div>
+          </div>
+
+
+          <!-- VIEW: QUẢN LÝ HỎI ĐÁP CỦA HỌC SINH (GIÁO VIÊN) -->
+          <div id="view-t-qna" class="tab-view space-y-6 hidden">
+            <div class="flex items-center justify-between">
+              <div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Hỏi Đáp Của Học Sinh</h2>
+                <p class="text-sm text-slate-500">Xem các câu hỏi học sinh gửi đến, tự trả lời hoặc yêu cầu AI hỗ trợ trả lời.</p>
+              </div>
+            </div>
+            
+            <div id="t-qna-list" class="space-y-4">
+              <!-- Render câu hỏi bằng JS -->
+              <div class="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200">Đang tải danh sách câu hỏi...</div>
             </div>
           </div>
 
@@ -1048,46 +1067,30 @@
 
           </div>
 
-          <!-- VIEW: HỎI ĐÁP CÔ HIỀN (AI CHATBOT) -->
+          <!-- VIEW: HỎI ĐÁP CÔ HIỀN (Q&A BOARD) -->
           <div id="view-s-chat" class="tab-view space-y-6 hidden">
-            <div class="flex flex-col h-[550px] bg-white rounded-2xl border border-slate-200 overflow-hidden shadow-sm">
-              <!-- Header chatbot -->
-              <div class="p-4 bg-gradient-to-r from-brand-600 to-brand-700 text-white flex items-center justify-between shrink-0">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center text-lg font-bold">
-                    👩‍🏫
-                  </div>
-                  <div>
-                    <h3 class="font-bold text-sm">Cô Hiền - Giáo Viên Tiếng Anh Ảo (AI)</h3>
-                    <p class="text-[10px] text-brand-100 flex items-center gap-1">
-                      <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-ping"></span> Hoạt động 24/7 • Luôn sẵn sàng giải thích
-                    </p>
-                  </div>
-                </div>
-                <button onclick="clearChat()" class="text-xs text-brand-100 hover:text-white underline">Xoá hội thoại</button>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Hỏi Đáp Với Cô Hiền</h2>
+                <p class="text-sm text-slate-500">Gửi câu hỏi của con cho Cô Hiền hoặc yêu cầu AI trả lời giúp con ngay lập tức.</p>
               </div>
+            </div>
 
-              <!-- Nội dung tin nhắn chat -->
-              <div id="chat-messages-box" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50">
-                <!-- Tin chào mừng mặc định của cô -->
-                <div class="flex items-start gap-3">
-                  <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm shrink-0">
-                    👩‍🏫
-                  </div>
-                  <div class="bg-white p-3.5 rounded-2xl rounded-tl-none shadow-sm text-sm border border-slate-100 max-w-[80%]">
-                    Hello con! Rất vui được gặp con trong phòng học của Cô Hiền. 💖 Con có câu hỏi nào về từ vựng, ngữ pháp hay phát âm không? Đừng ngần ngại hỏi cô nhé, *practice makes perfect*!
-                  </div>
-                </div>
-              </div>
-
-              <!-- Khung nhập văn bản chat -->
-              <form id="chat-input-form" class="p-4 bg-white border-t border-slate-100 flex gap-3 shrink-0">
-                <input type="text" id="chat-input-msg" required placeholder="Nhắn tin cho cô (ví dụ: Giải thích giúp con thì hiện tại hoàn thành...)" 
-                  class="flex-1 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500">
-                <button type="submit" class="px-5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-md transition-all flex items-center justify-center">
-                  <i data-lucide="send" class="w-5 h-5"></i>
+            <!-- Khung nhập văn bản hỏi đáp -->
+            <form id="qna-input-form" class="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3">
+              <textarea id="qna-input-msg" required placeholder="Nhắn tin cho cô (ví dụ: Giải thích giúp con thì hiện tại hoàn thành...)" 
+                class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 min-h-[100px] resize-y"></textarea>
+              <div class="flex justify-end">
+                <button type="submit" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl shadow-md font-bold text-sm transition-all flex items-center gap-2">
+                  <i data-lucide="send" class="w-4 h-4"></i> Gửi Câu Hỏi
                 </button>
-              </form>
+              </div>
+            </form>
+
+            <h3 class="font-bold text-slate-800 text-lg mt-6">Các câu hỏi của con</h3>
+            <div id="s-qna-list" class="space-y-4">
+              <!-- Render câu hỏi bằng JS -->
+              <div class="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200">Đang tải danh sách câu hỏi...</div>
             </div>
           </div>
 

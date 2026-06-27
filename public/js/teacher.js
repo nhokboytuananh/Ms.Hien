@@ -2094,3 +2094,130 @@ window.handleWordFileUpload = (event) => {
 };
 
 
+// ==========================================
+// 4. QUẢN LÝ HỎI ĐÁP CỦA HỌC SINH (TEACHER)
+// ==========================================
+
+window.loadTeacherQna = async () => {
+  const container = document.getElementById('t-qna-list');
+  try {
+    const list = await window.apiFetch('/api/qna');
+    if (list.length === 0) {
+      container.innerHTML = '<div class="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200">Chưa có câu hỏi nào từ học sinh.</div>';
+      return;
+    }
+    
+    container.innerHTML = list.map(q => {
+      let answerHtml = '';
+      if (q.status === 'ai_answered' && q.ai_answer) {
+        answerHtml = `
+          <div class="mt-4 p-4 bg-brand-50 rounded-xl border border-brand-100 flex gap-3">
+            <div class="w-8 h-8 rounded-full bg-brand-600 text-white flex items-center justify-center text-sm shrink-0">👩‍🏫</div>
+            <div class="text-sm text-slate-800 leading-relaxed w-full">
+              <strong class="text-brand-700 block mb-1">Cô Hiền (AI):</strong>
+              ${q.ai_answer.replace(/\n/g, '<br>')}
+              <button onclick="overrideTeacherAnswer(${q.id}, '${escapeQuote(q.ai_answer)}')" class="mt-2 text-xs text-brand-600 hover:underline">Sửa lại câu trả lời này</button>
+            </div>
+          </div>
+        `;
+      } else if (q.status === 'teacher_answered' && q.teacher_answer) {
+        answerHtml = `
+          <div class="mt-4 p-4 bg-emerald-50 rounded-xl border border-emerald-100 flex gap-3">
+            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm shrink-0">👩‍🏫</div>
+            <div class="text-sm text-slate-800 leading-relaxed w-full">
+              <strong class="text-emerald-700 block mb-1">Cô Hiền (Trực tiếp):</strong>
+              ${q.teacher_answer.replace(/\n/g, '<br>')}
+            </div>
+          </div>
+        `;
+      } else {
+        answerHtml = `
+          <div class="mt-4 flex items-center gap-2">
+            <button onclick="openTeacherAnswerForm(${q.id})" class="px-3 py-1.5 bg-brand-100 text-brand-700 rounded-lg text-sm hover:bg-brand-200 transition-all font-medium">Cô sẽ trả lời</button>
+            <button onclick="requestAiAnswerTeacher(${q.id})" class="px-3 py-1.5 border border-brand-200 text-brand-600 rounded-lg text-sm hover:bg-brand-50 transition-all flex items-center gap-1">
+              <i data-lucide="bot" class="w-4 h-4"></i> Yêu cầu AI trả lời
+            </button>
+          </div>
+          <div id="t-answer-form-${q.id}" class="hidden mt-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+             <textarea id="t-answer-input-${q.id}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-brand-500 min-h-[80px]" placeholder="Nhập câu trả lời của cô..."></textarea>
+             <div class="flex justify-end mt-2">
+               <button onclick="submitTeacherAnswer(${q.id})" class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 font-bold">Gửi trả lời</button>
+             </div>
+          </div>
+        `;
+      }
+      
+      return `
+        <div class="p-4 bg-white rounded-xl border border-slate-200 shadow-sm relative">
+          <div class="absolute top-4 right-4 text-xs text-slate-400">${new Date(q.created_at).toLocaleDateString('vi-VN')}</div>
+          <div class="text-sm text-brand-600 font-bold mb-2 flex items-center gap-2">
+            <i data-lucide="user" class="w-4 h-4"></i> ${q.student_name} <span class="text-slate-400 font-normal">(${q.class_name || 'Không rõ lớp'})</span>
+          </div>
+          <div class="text-slate-900 bg-slate-50 p-3 rounded-lg border border-slate-100">${q.question_text.replace(/\n/g, '<br>')}</div>
+          ${answerHtml}
+        </div>
+      `;
+    }).join('');
+    
+    if(window.lucide) window.lucide.createIcons();
+  } catch (err) {
+    container.innerHTML = `<div class="p-8 text-center text-red-500 bg-red-50 rounded-xl border border-red-200">Lỗi: ${err.message}</div>`;
+  }
+};
+
+window.escapeQuote = (str) => {
+  return str.replace(/'/g, "\\'").replace(/"/g, '\\"');
+};
+
+window.openTeacherAnswerForm = (qId) => {
+  document.getElementById(`t-answer-form-${qId}`).classList.remove('hidden');
+};
+
+window.overrideTeacherAnswer = (qId, aiAnswerText) => {
+  const answerFormHTML = `
+    <div class="mt-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+       <textarea id="t-answer-input-${qId}" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-brand-500 min-h-[80px]">${aiAnswerText}</textarea>
+       <div class="flex justify-end mt-2">
+         <button onclick="submitTeacherAnswer(${qId})" class="px-4 py-2 bg-brand-600 text-white rounded-lg text-sm hover:bg-brand-700 font-bold">Lưu thay đổi</button>
+       </div>
+    </div>
+  `;
+  // Thay thế node cha
+  const itemDiv = document.querySelector(`button[onclick*="overrideTeacherAnswer(${qId}"]`).closest('.p-4.bg-white');
+  if(itemDiv) {
+      itemDiv.innerHTML += answerFormHTML;
+  }
+};
+
+window.submitTeacherAnswer = async (qId) => {
+  const input = document.getElementById(`t-answer-input-${qId}`);
+  if(!input) return;
+  const teacher_answer = input.value.trim();
+  if(!teacher_answer) return;
+  
+  try {
+    input.disabled = true;
+    await window.apiFetch(`/api/qna/${qId}/teacher-answer`, {
+      method: 'POST',
+      body: JSON.stringify({ teacher_answer })
+    });
+    alert('Đã gửi câu trả lời thành công!');
+    window.loadTeacherQna();
+  } catch (err) {
+    alert(err.message);
+    input.disabled = false;
+  }
+};
+
+window.requestAiAnswerTeacher = async (questionId) => {
+  try {
+    alert('Đang yêu cầu AI trả lời...');
+    await window.apiFetch(`/api/qna/${questionId}/ai-answer`, { method: 'POST' });
+    alert('AI đã trả lời thành công!');
+    window.loadTeacherQna();
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+

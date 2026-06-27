@@ -102,6 +102,19 @@ CREATE TABLE exam_results (
   completed_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Hỏi đáp với cô Hiền
+CREATE TABLE student_questions (
+  id SERIAL PRIMARY KEY,
+  student_id INT REFERENCES users(id),
+  question_text TEXT NOT NULL,
+  ai_answer TEXT,
+  teacher_answer TEXT,
+  answered_by_teacher_id INT REFERENCES users(id),
+  status VARCHAR(20) DEFAULT 'pending', -- pending, ai_answered, teacher_answered
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);
+
 -- Cài đặt hệ thống (lưu API key AI, v.v.)
 CREATE TABLE settings (
   key VARCHAR(100) PRIMARY KEY,

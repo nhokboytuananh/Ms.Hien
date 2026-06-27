@@ -370,6 +370,9 @@ function triggerTabLoadData(tabName) {
   if (tabName === 't-exams' && typeof window.loadTeacherExams === 'function') {
     window.loadTeacherExams();
   }
+  if (tabName === 't-qna' && typeof window.loadTeacherQna === 'function') {
+    window.loadTeacherQna();
+  }
 
   // HỌC SINH
   if (tabName === 's-vocab' && typeof window.loadStudentVocabulary === 'function') {
@@ -377,6 +380,9 @@ function triggerTabLoadData(tabName) {
   }
   if (tabName === 's-exams' && typeof window.loadStudentExams === 'function') {
     window.loadStudentExams();
+  }
+  if (tabName === 's-chat' && typeof window.loadStudentQna === 'function') {
+    window.loadStudentQna();
   }
 }
 

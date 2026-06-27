@@ -35,6 +35,7 @@ import scoreRouter from './routes/scores.js';
 import vocabularyRouter from './routes/vocabulary.js';
 import examRouter from './routes/exams.js';
 import aiRouter from './routes/ai.js';
+import qnaRouter from './routes/qna.js';
 
 // Khởi tạo ứng dụng Express
 const app = express();
@@ -52,6 +53,7 @@ app.use('/api', scoreRouter);
 app.use('/api', vocabularyRouter);
 app.use('/api', examRouter);
 app.use('/api/ai', aiRouter);
+app.use('/api/qna', qnaRouter);
 
 // Cấu hình phục vụ thư mục static frontend (/public)
 const publicPath = path.join(process.cwd(), 'public');
