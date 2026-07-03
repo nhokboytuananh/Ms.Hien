@@ -47,7 +47,7 @@ router.post('/generate-thpt', requireAuth, requireTeacher, async (req, res) => {
 
   try {
     const currentYear = new Date().getFullYear();
-    const targetGrade = grade ? Number(grade) : 12;
+    const targetGrade = (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : 12;
     const themeInfo = topic ? `với các từ vựng và chủ đề liên quan đến: "${topic}"` : "bám sát chương trình THPT hiện hành";
 
     const systemPrompt = 
@@ -56,7 +56,7 @@ router.post('/generate-thpt', requireAuth, requireTeacher, async (req, res) => {
       "có sự phân hóa học sinh rõ rệt (60% nhận biết-thông hiểu, 30% vận dụng, 10% vận dụng cao). " +
       "Mỗi câu hỏi phải bao gồm đầy đủ 4 đáp án lựa chọn A, B, C, D, chỉ rõ đáp án đúng và có giải thích chi tiết bằng tiếng Việt.";
 
-    const contents = `Hãy tạo 20 câu hỏi trắc nghiệm luyện thi THPT Quốc Gia dành cho học sinh Lớp ${targetGrade} ${themeInfo}.`;
+    const contents = `Hãy tạo 20 câu hỏi trắc nghiệm luyện thi THPT Quốc Gia dành cho học sinh ${targetGrade === 0 ? 'Khối Tự Do' : 'Lớp ' + targetGrade} ${themeInfo}.`;
 
     const response = await generateWithRetry({
       model: "gemini-3.5-flash",
@@ -75,7 +75,7 @@ router.post('/generate-thpt', requireAuth, requireTeacher, async (req, res) => {
     }
 
     // 1. Lưu thông tin đề thi AI vào DB
-    const examTitle = `Đề Luyện Thi THPT QG Lớp ${targetGrade} (Tạo Tự Động Bởi AI Ms.Hiền)` + (topic ? ` - Chủ đề: ${topic}` : "");
+    const examTitle = `Đề Luyện Thi THPT QG ${targetGrade === 0 ? 'Khối Tự Do' : 'Lớp ' + targetGrade} (Tạo Tự Động Bởi AI Ms.Hiền)` + (topic ? ` - Chủ đề: ${topic}` : "");
     const examRes = await db.query(
       'INSERT INTO exams (title, exam_type, year, province, grade, duration_minutes, difficulty, is_ai_generated, created_by) ' +
       'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
@@ -130,7 +130,7 @@ router.post('/generate-hsg', requireAuth, requireTeacher, async (req, res) => {
 
   try {
     const currentYear = new Date().getFullYear();
-    const targetGrade = grade ? Number(grade) : 11;
+    const targetGrade = (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : 11;
     const diffText = difficulty_level === 'tinh' ? 'Cấp Tỉnh' : (difficulty_level === 'quocgia' ? 'Cấp Quốc Gia' : 'Cấp Trường');
     const examType = difficulty_level === 'tinh' ? 'hsg_tinh' : (difficulty_level === 'quocgia' ? 'hsg_quocgia' : 'hsg_truong');
 
@@ -140,7 +140,7 @@ router.post('/generate-hsg', requireAuth, requireTeacher, async (req, res) => {
       "Đề thi đòi hỏi tính tư duy sâu sắc, vốn từ vựng phong phú. " +
       "Mỗi câu hỏi phải bao gồm đầy đủ 4 đáp án lựa chọn A, B, C, D, chỉ rõ đáp án đúng và giải thích cấu trúc ngữ pháp hay thành ngữ đi kèm một cách chi tiết bằng tiếng Việt.";
 
-    const contents = `Hãy soạn thảo đề thi Học Sinh Giỏi ${diffText} môn Tiếng Anh lớp ${targetGrade} gồm 15 câu hỏi học thuật cực khó.`;
+    const contents = `Hãy soạn thảo đề thi Học Sinh Giỏi ${diffText} môn Tiếng Anh ${targetGrade === 0 ? 'Khối Tự Do' : 'lớp ' + targetGrade} gồm 15 câu hỏi học thuật cực khó.`;
 
     const response = await generateWithRetry({
       model: "gemini-3.5-flash",
@@ -159,7 +159,7 @@ router.post('/generate-hsg', requireAuth, requireTeacher, async (req, res) => {
     }
 
     // 1. Lưu thông tin đề thi HSG AI vào DB
-    const examTitle = `Đề thi Học Sinh Giỏi ${diffText} Lớp ${targetGrade} (Tạo Tự Động Bởi AI Ms.Hiền)`;
+    const examTitle = `Đề thi Học Sinh Giỏi ${diffText} ${targetGrade === 0 ? 'Khối Tự Do' : 'Lớp ' + targetGrade} (Tạo Tự Động Bởi AI Ms.Hiền)`;
     const examRes = await db.query(
       'INSERT INTO exams (title, exam_type, year, province, grade, duration_minutes, difficulty, is_ai_generated, created_by) ' +
       'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',

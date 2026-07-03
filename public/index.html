@@ -595,9 +595,11 @@
                   class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none"
                 >
                   <option value="">Tất cả khối lớp</option>
+                  <option value="9">Khối 9</option>
                   <option value="10">Khối 10</option>
                   <option value="11">Khối 11</option>
                   <option value="12">Khối 12</option>
+                  <option value="0">Khối tự do</option>
                 </select>
                 <button
                   onclick="loadTeacherVocabulary()"
@@ -716,6 +718,8 @@
                           <option value="12">Khối 12</option>
                           <option value="11">Khối 11</option>
                           <option value="10">Khối 10</option>
+                          <option value="9">Khối 9</option>
+                          <option value="0">Khối tự do</option>
                         </select>
                       </div>
                       <div>
@@ -1018,9 +1022,11 @@
                     id="s-vocab-filter-grade"
                     class="px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none"
                   >
+                    <option value="9">Từ Vựng Tiếng Anh 9</option>
                     <option value="10">Từ Vựng Tiếng Anh 10</option>
                     <option value="11">Từ Vựng Tiếng Anh 11</option>
                     <option value="12">Từ Vựng Tiếng Anh 12</option>
+                    <option value="0">Từ Vựng Tự Do</option>
                   </select>
                   <button
                     onclick="startFlashcardStudy()"
@@ -1163,9 +1169,11 @@
                         class="px-2.5 py-1 bg-white text-slate-800 rounded-lg text-xs font-bold focus:outline-none w-full"
                       >
                         <option value="all">Tất cả các khối</option>
+                        <option value="9">Lớp 9</option>
                         <option value="10">Lớp 10</option>
                         <option value="11">Lớp 11</option>
                         <option value="12">Lớp 12</option>
+                        <option value="0">Tự do</option>
                       </select>
                     </div>
                   </div>
@@ -1906,9 +1914,22 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-                  <!-- Cột trái: Danh sách các câu hỏi -->
-                  <div class="lg:col-span-3 space-y-6" id="exam-questions-list">
-                    <!-- Render động bởi JS -->
+                  <!-- Cột trái: Danh sách các câu hỏi và trình nghe nhạc -->
+                  <div class="lg:col-span-3 space-y-6">
+                    <!-- YouTube Listening Video Player -->
+                    <div id="exam-listening-player-container" class="hidden bg-white p-5 rounded-3xl border border-slate-200 shadow-sm space-y-3">
+                      <div class="flex items-center gap-2 text-brand-600 font-bold text-sm">
+                        <i data-lucide="music" class="w-4 h-4 animate-pulse"></i>
+                        <span>BÀI THI NGHE - VIDEO YOUTUBE HỖ TRỢ</span>
+                      </div>
+                      <div class="relative w-full aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-100">
+                        <iframe id="exam-listening-iframe" class="absolute inset-0 w-full h-full" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                      </div>
+                    </div>
+
+                    <div class="space-y-6" id="exam-questions-list">
+                      <!-- Render động bởi JS -->
+                    </div>
                   </div>
 
                   <!-- Cột phải: Bảng điều hướng nhanh & Nút nộp bài -->
@@ -2184,9 +2205,11 @@
               required
               class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none"
             >
+              <option value="9">Khối 9</option>
               <option value="10">Khối 10</option>
               <option value="11">Khối 11</option>
               <option value="12">Khối 12</option>
+              <option value="0">Khối tự do</option>
             </select>
           </div>
           <div>
@@ -2305,9 +2328,11 @@
                 class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none"
               >
                 <option value="">Lọc Khối</option>
+                <option value="9">Lớp 9</option>
                 <option value="10">Lớp 10</option>
                 <option value="11">Lớp 11</option>
                 <option value="12">Lớp 12</option>
+                <option value="0">Khối tự do</option>
               </select>
             </div>
             <div class="col-span-2">
@@ -2408,9 +2433,11 @@
               id="vocab-ai-grade"
               class="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:border-brand-500 text-sm"
             >
+              <option value="9">Khối 9</option>
               <option value="10">Khối 10</option>
               <option value="11">Khối 11</option>
               <option value="12">Khối 12</option>
+              <option value="0">Khối tự do</option>
             </select>
           </div>
 
@@ -2815,9 +2842,11 @@
                   class="px-2.5 py-1 bg-white text-slate-800 rounded-lg text-xs font-bold focus:outline-none"
                 >
                   <option value="all">Tất cả các khối</option>
+                  <option value="9">Lớp 9</option>
                   <option value="10">Lớp 10</option>
                   <option value="11">Lớp 11</option>
                   <option value="12">Lớp 12</option>
+                  <option value="0">Tự do</option>
                 </select>
               </div>
             </div>
@@ -3496,6 +3525,8 @@
                 <option value="12">Khối 12</option>
                 <option value="11">Khối 11</option>
                 <option value="10">Khối 10</option>
+                <option value="9">Khối 9</option>
+                <option value="0">Khối tự do</option>
               </select>
             </div>
             <div>
@@ -3527,6 +3558,18 @@
                 <option value="hard">Khó</option>
                 <option value="mixed">Hỗn hợp</option>
               </select>
+            </div>
+            <div class="md:col-span-2">
+              <label
+                class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1"
+                >Link Video YouTube (Dành cho đề thi nghe - Nhập link youtube nếu có)</label
+              >
+              <input
+                type="text"
+                id="manual-exam-youtube-link"
+                placeholder="Ví dụ: https://www.youtube.com/watch?v=dQw4w9WgXcQ"
+                class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500"
+              />
             </div>
           </div>
 
@@ -3765,6 +3808,19 @@
               <input
                 type="checkbox"
                 name="assign-grade"
+                value="9"
+                class="assign-grade-cb w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500"
+              />
+              <span class="text-sm font-medium text-slate-700"
+                >Học sinh khối 9</span
+              >
+            </label>
+            <label
+              class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors"
+            >
+              <input
+                type="checkbox"
+                name="assign-grade"
                 value="10"
                 class="assign-grade-cb w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500"
               />
@@ -3796,6 +3852,19 @@
               />
               <span class="text-sm font-medium text-slate-700"
                 >Học sinh khối 12</span
+              >
+            </label>
+            <label
+              class="flex items-center gap-3 p-3 border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition-colors"
+            >
+              <input
+                type="checkbox"
+                name="assign-grade"
+                value="0"
+                class="assign-grade-cb w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500"
+              />
+              <span class="text-sm font-medium text-slate-700"
+                >Học sinh tự do</span
               >
             </label>
           </div>

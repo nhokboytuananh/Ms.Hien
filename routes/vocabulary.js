@@ -85,7 +85,7 @@ router.post("/vocabulary", requireAuth, requireTeacher, async (req, res) => {
         meaning_vi,
         example || "",
         topic || "Chung",
-        grade ? Number(grade) : null,
+        (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : null,
         unit || null,
         creatorId,
       ],
@@ -160,7 +160,7 @@ router.put("/vocabulary/:id", requireAuth, requireTeacher, async (req, res) => {
         meaning_vi,
         example || "",
         topic || "Chung",
-        grade ? Number(grade) : null,
+        (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : null,
         unit || null,
         Number(id),
       ],
@@ -220,7 +220,7 @@ router.post(
   requireTeacher,
   async (req, res) => {
     const { grade } = req.body;
-    if (!grade) {
+    if (grade === undefined || grade === null || grade === "") {
       return res.status(400).json({ error: "Vui lòng chọn khối lớp." });
     }
 
@@ -249,7 +249,8 @@ router.post(
         },
       };
 
-      const prompt = `Sinh ngẫu nhiên 5 từ vựng tiếng Anh trình độ trung học phổ thông khối ${grade}. Đảm bảo các từ vựng này phổ biến và bám sát chương trình học khối ${grade}.
+      const gradeText = Number(grade) === 0 ? "Tự Do (mọi trình độ)" : `Khối ${grade}`;
+      const prompt = `Sinh ngẫu nhiên 5 từ vựng tiếng Anh trình độ trung học phổ thông phù hợp với ${gradeText}. Đảm bảo các từ vựng này phổ biến và bám sát chương trình học ${gradeText}.
     Hãy cung cấp từ, phát âm IPA, nghĩa tiếng việt, câu ví dụ và dịch nghĩa của ví dụ.`;
 
       const response = await generateWithRetry({

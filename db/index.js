@@ -267,6 +267,18 @@ if (isProduction) {
           WHERE role = 'teacher' OR id = 1
         `);
         console.log('--- ĐÃ ĐỒNG BỘ TÀI KHOẢN GIÁO VIÊN MẶC ĐỊNH TRONG POSTGRESQL THÀNH CÔNG ---');
+
+        // Đảm bảo bảng exams có cột youtube_link
+        await pool.query(`
+          ALTER TABLE exams ADD COLUMN IF NOT EXISTS youtube_link VARCHAR(300);
+        `);
+        console.log('--- ĐÃ ĐẢM BẢO CỘT YOUTUBE_LINK TRONG BẢNG EXAMS THÀNH CÔNG ---');
+
+        // Đảm bảo bảng exam_questions có cột youtube_link
+        await pool.query(`
+          ALTER TABLE exam_questions ADD COLUMN IF NOT EXISTS youtube_link VARCHAR(300);
+        `);
+        console.log('--- ĐÃ ĐẢM BẢO CỘT YOUTUBE_LINK TRONG BẢNG EXAM_QUESTIONS THÀNH CÔNG ---');
       }
     } catch (err) {
       console.error('Lỗi khi khởi tạo schema PostgreSQL:', err);
@@ -661,6 +673,7 @@ if (isProduction) {
           difficulty: params[6],
           is_ai_generated: params[7] === 'true' || params[7] === true,
           created_by: Number(params[8]),
+          youtube_link: params[9] || null,
           status: 'draft',
           created_at: new Date()
         };
@@ -692,18 +705,35 @@ if (isProduction) {
             return { rows: [data.exams[idx]], rowCount: 1 };
           }
         } else {
-          // UPDATE exams SET title = $1, grade = $2, duration_minutes = $3 WHERE id = $4
-          const title = params[0];
-          const grade = Number(params[1]);
-          const duration = Number(params[2]);
-          const id = Number(params[3]);
-          const idx = data.exams.findIndex(e => e.id === id);
-          if (idx !== -1) {
-            data.exams[idx].title = title;
-            data.exams[idx].grade = grade;
-            data.exams[idx].duration_minutes = duration;
-            saveLocalData(data);
-            return { rows: [data.exams[idx]], rowCount: 1 };
+          if (queryStr.includes('youtube_link = $4')) {
+            const title = params[0];
+            const grade = Number(params[1]);
+            const duration = Number(params[2]);
+            const youtube_link = params[3];
+            const id = Number(params[4]);
+            const idx = data.exams.findIndex(e => e.id === id);
+            if (idx !== -1) {
+              data.exams[idx].title = title;
+              data.exams[idx].grade = grade;
+              data.exams[idx].duration_minutes = duration;
+              data.exams[idx].youtube_link = youtube_link;
+              saveLocalData(data);
+              return { rows: [data.exams[idx]], rowCount: 1 };
+            }
+          } else {
+            // UPDATE exams SET title = $1, grade = $2, duration_minutes = $3 WHERE id = $4
+            const title = params[0];
+            const grade = Number(params[1]);
+            const duration = Number(params[2]);
+            const id = Number(params[3]);
+            const idx = data.exams.findIndex(e => e.id === id);
+            if (idx !== -1) {
+              data.exams[idx].title = title;
+              data.exams[idx].grade = grade;
+              data.exams[idx].duration_minutes = duration;
+              saveLocalData(data);
+              return { rows: [data.exams[idx]], rowCount: 1 };
+            }
           }
         }
         return { rows: [], rowCount: 0 };
@@ -783,7 +813,8 @@ if (isProduction) {
           option_d: params[7],
           correct_answer: params[8],
           explanation: params[9],
-          question_type: params[10] || 'multiple_choice'
+          question_type: (params[10] && params[10].startsWith('http')) ? 'multiple_choice' : (params[10] || 'multiple_choice'),
+          youtube_link: (params[10] && params[10].startsWith('http')) ? params[10] : (params[11] || null)
         };
         data.exam_questions.push(newQuestion);
         saveLocalData(data);

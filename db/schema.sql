@@ -70,6 +70,7 @@ CREATE TABLE exams (
   is_ai_generated BOOLEAN DEFAULT FALSE,
   assigned_groups JSONB,
   status VARCHAR(20) DEFAULT 'draft',
+  youtube_link VARCHAR(300),
   created_by INT REFERENCES users(id),
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -87,7 +88,8 @@ CREATE TABLE exam_questions (
   option_d TEXT,
   correct_answer CHAR(1),  -- A/B/C/D
   explanation TEXT,
-  question_type VARCHAR(30) DEFAULT 'multiple_choice'
+  question_type VARCHAR(30) DEFAULT 'multiple_choice',
+  youtube_link VARCHAR(300)
 );
 
 -- Kết quả làm bài của học sinh

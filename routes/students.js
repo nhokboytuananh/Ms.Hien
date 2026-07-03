@@ -53,7 +53,7 @@ router.post("/classes", requireAuth, requireTeacher, async (req, res) => {
 
     const result = await db.query(
       "INSERT INTO classes (name, teacher_id, school_year, grade) VALUES ($1, $2, $3, $4) RETURNING *",
-      [name, teacherId, school_year || "2025-2026", grade ? Number(grade) : 10],
+      [name, teacherId, school_year || "2025-2026", (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : 10],
     );
 
     res.status(201).json({
@@ -385,25 +385,55 @@ router.post("/game-results", requireAuth, async (req, res) => {
  * @desc Lấy bảng xếp hạng game
  */
 router.get("/game-leaderboards", requireAuth, async (req, res) => {
-  try {
-    // Top 5 chơi nhiều nhất
-    const topPlayedRes = await db.query(`
-      SELECT u.full_name, COUNT(g.id) as play_count 
-      FROM game_results g 
-      JOIN users u ON g.student_id = u.id 
-      GROUP BY u.id, u.full_name 
-      ORDER BY play_count DESC 
-      LIMIT 5
-    `);
+  const { game_type } = req.query;
 
-    // Top 5 điểm cao nhất, nhanh nhất
-    const topScoreRes = await db.query(`
-      SELECT u.full_name, g.score, g.time_spent, g.game_type
-      FROM game_results g 
-      JOIN users u ON g.student_id = u.id 
-      ORDER BY g.score DESC, g.time_spent ASC 
-      LIMIT 5
-    `);
+  try {
+    let topPlayedRes;
+    let topScoreRes;
+
+    if (game_type && game_type !== "all") {
+      // Top 5 chơi nhiều nhất theo game_type
+      topPlayedRes = await db.query(
+        `SELECT u.full_name, COUNT(g.id) as play_count 
+         FROM game_results g 
+         JOIN users u ON g.student_id = u.id 
+         WHERE g.game_type = $1
+         GROUP BY u.id, u.full_name 
+         ORDER BY play_count DESC 
+         LIMIT 5`,
+        [game_type]
+      );
+
+      // Top 5 điểm cao nhất, nhanh nhất theo game_type
+      topScoreRes = await db.query(
+        `SELECT u.full_name, g.score, g.time_spent, g.game_type
+         FROM game_results g 
+         JOIN users u ON g.student_id = u.id 
+         WHERE g.game_type = $1
+         ORDER BY g.score DESC, g.time_spent ASC 
+         LIMIT 5`,
+        [game_type]
+      );
+    } else {
+      // Top 5 chơi nhiều nhất (tất cả)
+      topPlayedRes = await db.query(`
+        SELECT u.full_name, COUNT(g.id) as play_count 
+        FROM game_results g 
+        JOIN users u ON g.student_id = u.id 
+        GROUP BY u.id, u.full_name 
+        ORDER BY play_count DESC 
+        LIMIT 5
+      `);
+
+      // Top 5 điểm cao nhất, nhanh nhất (tất cả)
+      topScoreRes = await db.query(`
+        SELECT u.full_name, g.score, g.time_spent, g.game_type
+        FROM game_results g 
+        JOIN users u ON g.student_id = u.id 
+        ORDER BY g.score DESC, g.time_spent ASC 
+        LIMIT 5
+      `);
+    }
 
     res.json({
       topPlayed: topPlayedRes.rows,

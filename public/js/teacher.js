@@ -580,7 +580,7 @@ window.loadTeacherExams = async () => {
             ${e.title}
           </span>
         </td>
-        <td class="py-3 text-slate-500 font-medium text-xs">${typeText} (Lớp ${e.grade})</td>
+        <td class="py-3 text-slate-500 font-medium text-xs">${typeText} (${e.grade === 0 ? "Khối tự do" : "Lớp " + e.grade})</td>
         <td class="py-3 text-slate-400 text-xs">
           <div class="flex flex-col gap-1">
             <span>${e.duration_minutes} phút</span>
@@ -1351,14 +1351,30 @@ window.submitTeacherQuizAnswer = (chosenOption, clickedBtn) => {
   }
 };
 
+window.speakEnglishText = (text) => {
+  if (!window.speechSynthesis) return;
+  window.speechSynthesis.cancel();
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.lang = "en-US";
+  
+  const voices = window.speechSynthesis.getVoices();
+  const usVoice = voices.find(v => v.lang === "en-US" || v.lang.startsWith("en-US") || v.lang.toLowerCase().includes("us-"));
+  if (usVoice) {
+    utterance.voice = usVoice;
+  } else {
+    const enVoice = voices.find(v => v.lang.startsWith("en") || v.lang.toLowerCase().includes("english"));
+    if (enVoice) utterance.voice = enVoice;
+  }
+  
+  utterance.rate = 0.85;
+  window.speechSynthesis.speak(utterance);
+};
+
 window.speakTeacherQuizWord = () => {
   const index = window.teacherState.gameQuestionIndex;
   const word = window.teacherState.gameQuestions[index];
   if (!word) return;
-  const utterance = new SpeechSynthesisUtterance(word.word);
-  utterance.lang = "en-US";
-  utterance.rate = 0.85;
-  window.speechSynthesis.speak(utterance);
+  window.speakEnglishText(word.word);
 };
 
 // ==========================================
@@ -1736,6 +1752,32 @@ window.showTeacherGameReport = (score, total) => {
 // THI THỬ & XEM TRƯỚC ĐỀ THI DÀNH CHO GIÁO VIÊN
 // ==========================================
 
+// Trích xuất video ID và tạo link nhúng YouTube từ link thường
+function getYouTubeEmbedUrl(url) {
+  if (!url) return null;
+  let videoId = "";
+  try {
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+    const match = url.match(regExp);
+    if (match && match[2].length === 11) {
+      videoId = match[2];
+    } else {
+      const urlObj = new URL(url);
+      if (urlObj.hostname === "youtu.be") {
+        videoId = urlObj.pathname.slice(1);
+      } else {
+        videoId = urlObj.searchParams.get("v");
+      }
+    }
+  } catch (e) {
+    console.error("Lỗi parse link YouTube:", e);
+  }
+  if (videoId) {
+    return `https://www.youtube.com/embed/${videoId}`;
+  }
+  return null;
+}
+
 window.teacherPreviewState = {
   examId: null,
   questions: [],
@@ -1762,7 +1804,7 @@ window.previewExamForTeacher = async (examId) => {
           ? "Thi Học Sinh Giỏi"
           : "Kiểm Tra Học Kỳ";
     document.getElementById("preview-exam-info").textContent =
-      `Lớp ${data.exam.grade} | Thời lượng: ${data.exam.duration_minutes} phút | Số câu hỏi: ${data.questions.length} câu`;
+      `${data.exam.grade === 0 ? "Khối tự do" : "Lớp " + data.exam.grade} | Thời lượng: ${data.exam.duration_minutes} phút | Số câu hỏi: ${data.questions.length} câu`;
 
     // Huy hiệu trạng thái
     const isDraft = data.exam.status === "draft";
@@ -1817,6 +1859,25 @@ window.previewExamForTeacher = async (examId) => {
         div.className =
           "bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4";
         div.id = `preview-question-block-${qNum}`;
+
+        let ytPlayerHtml = "";
+        if (g.youtube_link) {
+          const embedUrl = getYouTubeEmbedUrl(g.youtube_link);
+          if (embedUrl) {
+            ytPlayerHtml = `
+              <div class="my-3 bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                <div class="flex items-center gap-1.5 text-brand-600 font-bold text-xs mb-2">
+                  <i data-lucide="music" class="w-3.5 h-3.5 animate-pulse"></i>
+                  <span>BÀI NGHE HỖ TRỢ (XEM TRƯỚC CÂU HỎI ĐƠN)</span>
+                </div>
+                <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-100">
+                  <iframe class="absolute inset-0 w-full h-full" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+              </div>
+            `;
+          }
+        }
+
         div.innerHTML = `
           <div class="flex items-center gap-2 border-b border-slate-50 pb-2">
             <span class="w-7 h-7 bg-brand-600 text-white rounded-full flex items-center justify-center font-bold text-sm">
@@ -1824,6 +1885,7 @@ window.previewExamForTeacher = async (examId) => {
             </span>
             <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">${g.part || "Trắc nghiệm"}</span>
           </div>
+          ${ytPlayerHtml}
           <p class="font-semibold text-slate-800 leading-relaxed text-sm whitespace-pre-line">${g.question_text}</p>
           
           <div class="space-y-2.5">
@@ -1854,12 +1916,31 @@ window.previewExamForTeacher = async (examId) => {
         groupBlock.className =
           "bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-6";
 
+        let ytPlayerHtml = "";
+        if (g.youtube_link) {
+          const embedUrl = getYouTubeEmbedUrl(g.youtube_link);
+          if (embedUrl) {
+            ytPlayerHtml = `
+              <div class="my-3 bg-white p-4 rounded-2xl border border-emerald-100">
+                <div class="flex items-center gap-1.5 text-emerald-600 font-bold text-xs mb-2">
+                  <i data-lucide="music" class="w-3.5 h-3.5 animate-pulse"></i>
+                  <span>BÀI NGHE HỖ TRỢ (XEM TRƯỚC NHÓM CÂU HỎI)</span>
+                </div>
+                <div class="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-100">
+                  <iframe class="absolute inset-0 w-full h-full" src="${embedUrl}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                </div>
+              </div>
+            `;
+          }
+        }
+
         groupBlock.innerHTML = `
           <div class="border-b border-slate-100 pb-3 flex items-center justify-between">
             <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-extrabold rounded-full border border-emerald-200 uppercase tracking-wider flex items-center gap-1.5 w-fit">
-              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Bài Đọc Hiểu (Reading Comprehension)
+              <i data-lucide="book-open" class="w-3.5 h-3.5"></i> Bài Đọc/Nghe Chùm (Group Questions)
             </span>
           </div>
+          ${ytPlayerHtml}
           <div class="bg-slate-50 border border-slate-150 rounded-2xl p-5 leading-relaxed text-slate-800 text-sm whitespace-pre-line font-medium max-h-[250px] overflow-y-auto">
             ${g.passage}
           </div>
@@ -1938,6 +2019,10 @@ window.closeTeacherExamPreviewModal = () => {
   document
     .getElementById("teacher-exam-preview-modal")
     .classList.remove("flex");
+
+  // Dừng tất cả video/audio trong iframe của modal xem trước
+  const iframes = document.querySelectorAll("#preview-exam-questions-container iframe");
+  iframes.forEach(f => f.src = "");
 };
 
 window.resetTeacherPreviewExam = () => {
@@ -2148,11 +2233,15 @@ window.groupQuestions = (questions) => {
           original_num: qNum,
           question_text: subQuestionText,
         });
+        if (q.youtube_link && !currentGroup.youtube_link) {
+          currentGroup.youtube_link = q.youtube_link;
+        }
       } else {
         currentPassage = passage;
         currentGroup = {
           type: "reading_group",
           passage: passage,
+          youtube_link: q.youtube_link || null,
           part: q.part || "Đọc hiểu",
           subQuestions: [
             {
@@ -2198,6 +2287,8 @@ window.openManualExamModal = (editingExam = null) => {
       editingExam.exam.duration_minutes || 45;
     document.getElementById("manual-exam-difficulty").value =
       editingExam.exam.difficulty || "medium";
+    document.getElementById("manual-exam-youtube-link").value =
+      editingExam.exam.youtube_link || "";
 
     if (editingExam.questions && editingExam.questions.length > 0) {
       const grouped = window.groupQuestions(editingExam.questions);
@@ -2214,6 +2305,7 @@ window.openManualExamModal = (editingExam = null) => {
   } else {
     window.editingExamId = null;
     titleEl.textContent = "Tự soạn đề thi thủ công";
+    document.getElementById("manual-exam-youtube-link").value = "";
     window.addManualQuestionField();
   }
 
@@ -2291,6 +2383,11 @@ window.addManualQuestionField = (qData = null) => {
         <input type="text" class="explanation w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none" value="${qData ? qData.explanation : ""}" placeholder="Ví dụ: Chọn C vì đuôi -ed phát âm là /t/, các từ còn lại phát âm là /d/.">
       </div>
     </div>
+
+    <div class="pt-2 border-t border-slate-100/50">
+      <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Link Video YouTube cho riêng câu này (Nếu có - Dành cho bài nghe)</label>
+      <input type="text" class="question-youtube-link w-full px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500" value="${qData && qData.youtube_link ? qData.youtube_link : ""}" placeholder="Ví dụ: https://www.youtube.com/watch?v=dQw4w9WgXcQ">
+    </div>
   `;
 
   container.appendChild(div);
@@ -2321,6 +2418,11 @@ window.addManualReadingGroupField = (groupData = null) => {
     <div>
       <label class="block text-xs font-extrabold uppercase tracking-wider text-emerald-600 mb-1.5">Nội dung đoạn văn đọc hiểu chung (Reading Passage)</label>
       <textarea required class="reading-passage-text w-full px-3 py-2.5 bg-white border border-emerald-100 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" rows="6" placeholder="Nhập đoạn văn đọc hiểu chung vào đây...">${groupData ? groupData.passage : ""}</textarea>
+    </div>
+
+    <div>
+      <label class="block text-xs font-extrabold uppercase tracking-wider text-emerald-600 mb-1.5">Link Video YouTube cho cả chùm câu hỏi này (Nếu có - Ví dụ cho bài nghe chùm)</label>
+      <input type="text" class="reading-youtube-link w-full px-3 py-2 bg-white border border-emerald-100 rounded-xl text-sm focus:outline-none focus:ring-1 focus:ring-emerald-400 focus:border-emerald-400" value="${groupData && groupData.youtube_link ? groupData.youtube_link : ""}" placeholder="Ví dụ: https://www.youtube.com/watch?v=dQw4w9WgXcQ">
     </div>
 
     <div class="border-t border-emerald-100 pt-4 space-y-4">
@@ -2477,6 +2579,7 @@ window.saveManualExam = async (event) => {
   entryBlocks.forEach((block) => {
     const type = block.dataset.type;
     if (type === "single") {
+      const qLinkVal = block.querySelector(".question-youtube-link") ? block.querySelector(".question-youtube-link").value.trim() : "";
       questions.push({
         part: block.querySelector(".question-part").value,
         question_text: block.querySelector(".question-text").value,
@@ -2486,9 +2589,11 @@ window.saveManualExam = async (event) => {
         option_d: block.querySelector(".option-d").value,
         correct_answer: block.querySelector(".correct-answer").value,
         explanation: block.querySelector(".explanation").value,
+        youtube_link: qLinkVal || null,
       });
     } else if (type === "reading_group") {
       const passage = block.querySelector(".reading-passage-text").value.trim();
+      const rLinkVal = block.querySelector(".reading-youtube-link") ? block.querySelector(".reading-youtube-link").value.trim() : "";
       const subBlocks = block.querySelectorAll(".manual-sub-question-block");
 
       subBlocks.forEach((subBlock) => {
@@ -2501,6 +2606,7 @@ window.saveManualExam = async (event) => {
           option_d: subBlock.querySelector(".sub-option-d").value,
           correct_answer: subBlock.querySelector(".sub-correct-answer").value,
           explanation: subBlock.querySelector(".sub-explanation").value,
+          youtube_link: rLinkVal || null,
         });
       });
     }
@@ -2511,12 +2617,15 @@ window.saveManualExam = async (event) => {
     return;
   }
 
+  const youtube_link = document.getElementById("manual-exam-youtube-link").value.trim();
+
   const bodyData = {
     title,
     exam_type,
     grade,
     duration_minutes,
     difficulty,
+    youtube_link: youtube_link || null,
     questions,
     is_ai_generated: false,
   };

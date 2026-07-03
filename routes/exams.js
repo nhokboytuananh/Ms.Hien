@@ -24,7 +24,15 @@ router.get('/exams', requireAuth, async (req, res) => {
 
     // Nếu người dùng là học sinh, chỉ hiển thị đề thi đã giao (status === 'assigned' hoặc undefined)
     if (req.user && req.user.role === 'student') {
-      const studentGrade = req.user.class_name ? req.user.class_name.match(/^(10|11|12)/)?.[1] : null;
+      let studentGrade = null;
+      if (req.user.class_name) {
+        const match = req.user.class_name.match(/^(9|10|11|12)/);
+        if (match) {
+          studentGrade = match[1];
+        } else if (/tự do|tu do/i.test(req.user.class_name)) {
+          studentGrade = "0";
+        }
+      }
       exams = exams.filter(e => {
         if (e.status !== 'assigned' && e.status !== 'published' && e.status !== undefined) return false;
         
@@ -62,7 +70,7 @@ router.get('/exams', requireAuth, async (req, res) => {
  */
 router.put('/exams/:id', requireAuth, requireTeacher, async (req, res) => {
   const { id } = req.params;
-  const { title, grade, duration_minutes, questions } = req.body;
+  const { title, grade, duration_minutes, youtube_link, questions } = req.body;
 
   if (!title || !questions || !Array.isArray(questions)) {
     return res.status(400).json({ error: 'Tiêu đề đề thi và danh sách câu hỏi là bắt buộc.' });
@@ -71,8 +79,8 @@ router.put('/exams/:id', requireAuth, requireTeacher, async (req, res) => {
   try {
     // 1. Cập nhật thông tin chung đề thi
     const examUpdateRes = await db.query(
-      'UPDATE exams SET title = $1, grade = $2, duration_minutes = $3 WHERE id = $4 RETURNING *',
-      [title, Number(grade) || 12, Number(duration_minutes) || 60, Number(id)]
+      'UPDATE exams SET title = $1, grade = $2, duration_minutes = $3, youtube_link = $4 WHERE id = $5 RETURNING *',
+      [title, (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : 12, Number(duration_minutes) || 60, youtube_link || null, Number(id)]
     );
 
     if (examUpdateRes.rows.length === 0) {
@@ -86,8 +94,8 @@ router.put('/exams/:id', requireAuth, requireTeacher, async (req, res) => {
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       await db.query(
-        'INSERT INTO exam_questions (exam_id, question_order, part, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation) ' +
-        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+        'INSERT INTO exam_questions (exam_id, question_order, part, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, youtube_link) ' +
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
         [
           Number(id),
           i + 1,
@@ -98,7 +106,8 @@ router.put('/exams/:id', requireAuth, requireTeacher, async (req, res) => {
           q.option_c || '',
           q.option_d || '',
           (q.correct_answer || 'A').toUpperCase().trim(),
-          q.explanation || ''
+          q.explanation || '',
+          q.youtube_link || null
         ]
       );
     }
@@ -489,7 +498,7 @@ router.get('/exams/:id/export-word', requireAuth, requireTeacher, async (req, re
  * @desc Tạo một đề thi thủ công hoàn chỉnh (Chỉ dành cho Giáo viên)
  */
 router.post('/exams', requireAuth, requireTeacher, async (req, res) => {
-  const { title, exam_type, year, province, grade, duration_minutes, difficulty, questions } = req.body;
+  const { title, exam_type, year, province, grade, duration_minutes, difficulty, youtube_link, questions } = req.body;
 
   if (!title || !exam_type || !questions || !Array.isArray(questions) || questions.length === 0) {
     return res.status(400).json({ error: 'Thiếu thông tin đề thi hoặc danh sách câu hỏi.' });
@@ -500,18 +509,19 @@ router.post('/exams', requireAuth, requireTeacher, async (req, res) => {
 
     // 1. Lưu thông tin đề thi trước để sinh ra exam_id
     const examResult = await db.query(
-      'INSERT INTO exams (title, exam_type, year, province, grade, duration_minutes, difficulty, is_ai_generated, created_by) ' +
-      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+      'INSERT INTO exams (title, exam_type, year, province, grade, duration_minutes, difficulty, is_ai_generated, created_by, youtube_link) ' +
+      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
       [
         title,
         exam_type,
         year ? Number(year) : new Date().getFullYear(),
         province || 'Toàn quốc',
-        grade ? Number(grade) : 12,
+        (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : 12,
         duration_minutes ? Number(duration_minutes) : 60,
         difficulty || 'medium',
         false,
-        creatorId
+        creatorId,
+        youtube_link || null
       ]
     );
 
@@ -521,8 +531,8 @@ router.post('/exams', requireAuth, requireTeacher, async (req, res) => {
     for (let i = 0; i < questions.length; i++) {
       const q = questions[i];
       await db.query(
-        'INSERT INTO exam_questions (exam_id, question_order, part, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation) ' +
-        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)',
+        'INSERT INTO exam_questions (exam_id, question_order, part, question_text, option_a, option_b, option_c, option_d, correct_answer, explanation, youtube_link) ' +
+        'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)',
         [
           newExam.id,
           i + 1,
@@ -533,7 +543,8 @@ router.post('/exams', requireAuth, requireTeacher, async (req, res) => {
           q.option_c || '',
           q.option_d || '',
           (q.correct_answer || 'A').toUpperCase().trim(),
-          q.explanation || ''
+          q.explanation || '',
+          q.youtube_link || null
         ]
       );
     }
@@ -621,7 +632,7 @@ router.post('/exams/upload', requireAuth, requireTeacher, async (req, res) => {
         exam_type || 'thpt_qg',
         year ? Number(year) : new Date().getFullYear(),
         province || 'Toàn quốc',
-        grade ? Number(grade) : 12,
+        (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : 12,
         duration_minutes ? Number(duration_minutes) : 60,
         difficulty || 'medium',
         true, // Đánh dấu là được sinh/xử lý bởi AI
