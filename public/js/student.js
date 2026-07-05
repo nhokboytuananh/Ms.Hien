@@ -1095,6 +1095,14 @@ window.loadStudentExams = async () => {
           </div>
           ${e.is_ai_generated ? '<span class="text-xs font-extrabold bg-amber-100 text-amber-700 px-2 py-0.5 rounded-lg border border-amber-200">AI</span>' : ""}
         </div>
+        ${e.material_link ? `
+        <div class="pt-1">
+          <a href="${e.material_link}" target="_blank" class="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 bg-slate-50 hover:bg-brand-50 text-slate-700 hover:text-brand-700 border border-slate-200 hover:border-brand-200 rounded-xl text-xs font-bold transition-all">
+            <i data-lucide="file-text" class="w-4 h-4 text-brand-500"></i>
+            Tài liệu đính kèm: ${e.material_title || "Xem tài liệu"}
+          </a>
+        </div>
+        ` : ''}
         <div class="flex gap-2.5">
           <button onclick="startExam(${e.id})" class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition-all shadow shadow-brand-500/10 cursor-pointer">
             Vào Làm Bài Thi Thử
@@ -1855,3 +1863,49 @@ function groupQuestions(questions) {
 
   return grouped;
 }
+
+// ==========================================
+// 4. QUẢN LÝ TÀI LIỆU THAM KHẢO (STUDENT)
+// ==========================================
+
+window.loadStudentMaterials = async () => {
+  try {
+    const list = await window.apiFetch("/api/materials");
+    const grid = document.getElementById("s-materials-grid");
+    grid.innerHTML = "";
+
+    if (list.length === 0) {
+      grid.innerHTML = `
+        <div class="col-span-full p-12 text-center text-slate-500 bg-white rounded-2xl border border-slate-200">
+          <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-slate-300 mb-3"></i>
+          Chưa có tài liệu nào được giao cho lớp của em học.
+        </div>
+      `;
+      if (typeof lucide !== "undefined") lucide.createIcons();
+      return;
+    }
+
+    list.forEach((m) => {
+      const card = document.createElement("div");
+      card.className = "bg-white rounded-2xl border border-slate-200 p-6 shadow-sm hover:border-brand-300 hover:shadow-md transition-all flex flex-col justify-between gap-4";
+      card.innerHTML = `
+        <div class="space-y-2">
+          <div class="p-3 bg-brand-50 text-brand-600 rounded-xl w-fit">
+            <i data-lucide="file-text" class="w-6 h-6"></i>
+          </div>
+          <h4 class="font-extrabold text-slate-900 text-base leading-snug">${m.title}</h4>
+          <p class="text-xs text-slate-400">Ngày đăng: ${new Date(m.created_at).toLocaleDateString("vi-VN")}</p>
+        </div>
+        <a href="${m.link}" target="_blank" class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs text-center transition-all shadow shadow-brand-500/10 flex items-center justify-center gap-1.5 cursor-pointer">
+          <i data-lucide="download" class="w-4 h-4"></i> Tải Tài Liệu Tham Khảo
+        </a>
+      `;
+      grid.appendChild(card);
+    });
+
+    if (typeof lucide !== "undefined") lucide.createIcons();
+  } catch (err) {
+    alert("Không thể tải tài liệu tham khảo: " + err.message);
+  }
+};
+

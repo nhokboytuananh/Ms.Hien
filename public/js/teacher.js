@@ -575,9 +575,16 @@ window.loadTeacherExams = async () => {
       tr.className = "hover:bg-slate-50/50";
       tr.innerHTML = `
         <td class="py-3 font-semibold text-slate-800">
-          <span class="flex items-center gap-1">
-            ${e.is_ai_generated ? '<span class="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold">AI</span>' : ""}
-            ${e.title}
+          <span class="flex flex-col gap-1">
+            <span class="flex items-center gap-1">
+              ${e.is_ai_generated ? '<span class="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded font-bold">AI</span>' : ""}
+              ${e.title}
+            </span>
+            ${e.material_link ? `
+              <a href="${e.material_link}" target="_blank" class="inline-flex items-center gap-1 text-[11px] font-bold text-brand-600 hover:underline">
+                <i data-lucide="file-text" class="w-3 h-3"></i> Tài liệu đính kèm: ${e.material_title || 'Xem tài liệu'}
+              </a>
+            ` : ""}
           </span>
         </td>
         <td class="py-3 text-slate-500 font-medium text-xs">${typeText} (${e.grade === 0 ? "Khối tự do" : "Lớp " + e.grade})</td>
@@ -2289,6 +2296,10 @@ window.openManualExamModal = (editingExam = null) => {
       editingExam.exam.difficulty || "medium";
     document.getElementById("manual-exam-youtube-link").value =
       editingExam.exam.youtube_link || "";
+    document.getElementById("manual-exam-material-link").value =
+      editingExam.exam.material_link || "";
+    document.getElementById("manual-exam-material-title").value =
+      editingExam.exam.material_title || "";
 
     if (editingExam.questions && editingExam.questions.length > 0) {
       const grouped = window.groupQuestions(editingExam.questions);
@@ -2306,6 +2317,8 @@ window.openManualExamModal = (editingExam = null) => {
     window.editingExamId = null;
     titleEl.textContent = "Tự soạn đề thi thủ công";
     document.getElementById("manual-exam-youtube-link").value = "";
+    document.getElementById("manual-exam-material-link").value = "";
+    document.getElementById("manual-exam-material-title").value = "";
     window.addManualQuestionField();
   }
 
@@ -2618,6 +2631,8 @@ window.saveManualExam = async (event) => {
   }
 
   const youtube_link = document.getElementById("manual-exam-youtube-link").value.trim();
+  const material_link = document.getElementById("manual-exam-material-link").value.trim();
+  const material_title = document.getElementById("manual-exam-material-title").value.trim();
 
   const bodyData = {
     title,
@@ -2626,6 +2641,8 @@ window.saveManualExam = async (event) => {
     duration_minutes,
     difficulty,
     youtube_link: youtube_link || null,
+    material_link: material_link || null,
+    material_title: material_title || null,
     questions,
     is_ai_generated: false,
   };
@@ -2831,3 +2848,232 @@ window.requestAiAnswerTeacher = async (questionId) => {
     alert(err.message);
   }
 };
+
+// ==========================================
+// 5. QUẢN LÝ TÀI LIỆU THAM KHẢO (TEACHER)
+// ==========================================
+
+window.loadTeacherMaterials = async () => {
+  try {
+    const list = await window.apiFetch("/api/materials");
+    window.currentMaterials = list;
+
+    const tbody = document.getElementById("t-materials-tbody");
+    tbody.innerHTML = "";
+
+    let total = list.length;
+    let assigned = 0;
+    let draft = 0;
+
+    if (total === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="4" class="py-8 text-center text-slate-400">
+            Chưa có tài liệu nào được đăng lên. Hãy bấm nút phía trên để thêm nhé cô!
+          </td>
+        </tr>
+      `;
+      document.getElementById("t-materials-total-count").textContent = "0";
+      document.getElementById("t-materials-assigned-count").textContent = "0";
+      document.getElementById("t-materials-draft-count").textContent = "0";
+      if (typeof lucide !== "undefined") lucide.createIcons();
+      return;
+    }
+
+    list.forEach((m) => {
+      const isDraft = m.status !== "assigned";
+      if (isDraft) draft++;
+      else assigned++;
+
+      let groups = [];
+      try {
+        groups = typeof m.assigned_groups === "string" ? JSON.parse(m.assigned_groups) : m.assigned_groups || [];
+      } catch (err) {}
+
+      let groupsText = "";
+      if (groups.includes("all")) {
+        groupsText = "Tất cả các lớp";
+      } else if (groups.length > 0) {
+        groupsText = "Khối: " + groups.map(g => g === "0" ? "Tự do" : g).join(", ");
+      }
+
+      const statusBadge = isDraft
+        ? `<span class="px-2 py-0.5 bg-orange-50 text-orange-600 border border-orange-100 rounded text-[10px] font-extrabold uppercase">Bản nháp</span>`
+        : `<span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-100 rounded text-[10px] font-extrabold uppercase">Đang giao</span>`;
+
+      const tr = document.createElement("tr");
+      tr.className = "hover:bg-slate-50/50";
+      tr.innerHTML = `
+        <td class="py-4 font-semibold text-slate-800">
+          <div class="flex flex-col gap-0.5">
+            <span class="text-sm font-extrabold text-slate-900">${m.title}</span>
+            <a href="${m.link}" target="_blank" class="inline-flex items-center gap-1 text-xs text-brand-500 hover:underline break-all">
+              <i data-lucide="external-link" class="w-3 h-3 shrink-0"></i> ${m.link}
+            </a>
+          </div>
+        </td>
+        <td class="py-4 text-center">
+          ${statusBadge}
+        </td>
+        <td class="py-4 text-slate-500 font-medium text-xs">
+          ${groupsText || '<span class="text-slate-400 font-normal">Chưa giao</span>'}
+        </td>
+        <td class="py-4 text-right">
+          <div class="flex flex-wrap items-center justify-end gap-1.5">
+            <button onclick="window.openAssignMaterialModal(${m.id})" class="px-2.5 py-1.5 ${m.status === 'assigned' ? 'bg-brand-50 text-brand-700 border border-brand-100 hover:bg-brand-100' : 'bg-emerald-50 text-emerald-700 border border-emerald-100 hover:bg-emerald-100'} rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+              <i data-lucide="send" class="w-3.5 h-3.5"></i> ${m.status === 'assigned' ? 'Quản lý giao' : 'Giao bài'}
+            </button>
+            <button onclick="window.openEditMaterialModal(${m.id})" class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+              <i data-lucide="edit" class="w-3.5 h-3.5"></i> Sửa
+            </button>
+            <button onclick="window.deleteMaterial(${m.id})" class="px-2.5 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Xóa
+            </button>
+          </div>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("t-materials-total-count").textContent = total;
+    document.getElementById("t-materials-assigned-count").textContent = assigned;
+    document.getElementById("t-materials-draft-count").textContent = draft;
+
+    if (typeof lucide !== "undefined") lucide.createIcons();
+  } catch (err) {
+    alert("Không thể tải tài liệu: " + err.message);
+  }
+};
+
+window.openCreateMaterialModal = () => {
+  document.getElementById("material-id-input").value = "";
+  document.getElementById("material-title-input").value = "";
+  document.getElementById("material-link-input").value = "";
+  document.getElementById("material-modal-title").textContent = "Thêm Tài Liệu Mới";
+  document.getElementById("material-modal").classList.remove("hidden");
+  document.getElementById("material-modal").classList.add("flex");
+};
+
+window.openEditMaterialModal = (id) => {
+  const m = window.currentMaterials.find(x => x.id === Number(id));
+  if (!m) return;
+  document.getElementById("material-id-input").value = m.id;
+  document.getElementById("material-title-input").value = m.title;
+  document.getElementById("material-link-input").value = m.link;
+  document.getElementById("material-modal-title").textContent = "Chỉnh sửa tài liệu";
+  document.getElementById("material-modal").classList.remove("hidden");
+  document.getElementById("material-modal").classList.add("flex");
+};
+
+window.closeMaterialModal = () => {
+  document.getElementById("material-modal").classList.add("hidden");
+  document.getElementById("material-modal").classList.remove("flex");
+};
+
+window.saveMaterial = async (event) => {
+  event.preventDefault();
+  const id = document.getElementById("material-id-input").value;
+  const title = document.getElementById("material-title-input").value.trim();
+  const link = document.getElementById("material-link-input").value.trim();
+
+  try {
+    if (id) {
+      await window.apiFetch(`/api/materials/${id}`, {
+        method: "PUT",
+        body: JSON.stringify({ title, link }),
+      });
+      alert("Đã cập nhật tài liệu thành công!");
+    } else {
+      await window.apiFetch("/api/materials", {
+        method: "POST",
+        body: JSON.stringify({ title, link }),
+      });
+      alert("Đã thêm tài liệu thành công!");
+    }
+    window.closeMaterialModal();
+    window.loadTeacherMaterials();
+  } catch (err) {
+    alert("Lỗi khi lưu tài liệu: " + err.message);
+  }
+};
+
+window.openAssignMaterialModal = (id) => {
+  const m = window.currentMaterials.find(x => x.id === Number(id));
+  if (!m) return;
+  document.getElementById("assign-material-id").value = m.id;
+
+  let assigned_groups = [];
+  try {
+    assigned_groups = typeof m.assigned_groups === "string" ? JSON.parse(m.assigned_groups) : m.assigned_groups || [];
+  } catch (err) {}
+
+  const checkboxes = document.querySelectorAll(".material-assign-group-checkbox");
+  checkboxes.forEach((cb) => {
+    cb.checked = assigned_groups.includes(cb.value);
+  });
+
+  document.getElementById("assign-material-modal").classList.remove("hidden");
+  document.getElementById("assign-material-modal").classList.add("flex");
+};
+
+window.closeAssignMaterialModal = () => {
+  document.getElementById("assign-material-modal").classList.add("hidden");
+  document.getElementById("assign-material-modal").classList.remove("flex");
+};
+
+window.submitAssignMaterial = async () => {
+  const id = document.getElementById("assign-material-id").value;
+  const checkboxes = document.querySelectorAll(".material-assign-group-checkbox");
+  const assigned_groups = [];
+  checkboxes.forEach((cb) => {
+    if (cb.checked) assigned_groups.push(cb.value);
+  });
+
+  if (assigned_groups.length === 0) {
+    alert("Vui lòng chọn ít nhất một lớp/khối hoặc bấm nút Thu hồi.");
+    return;
+  }
+
+  try {
+    await window.apiFetch(`/api/materials/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status: "assigned", assigned_groups }),
+    });
+    alert("Đã giao tài liệu thành công!");
+    window.closeAssignMaterialModal();
+    window.loadTeacherMaterials();
+  } catch (err) {
+    alert("Lỗi khi giao tài liệu: " + err.message);
+  }
+};
+
+window.revokeMaterial = async () => {
+  const id = document.getElementById("assign-material-id").value;
+  try {
+    await window.apiFetch(`/api/materials/${id}/status`, {
+      method: "PUT",
+      body: JSON.stringify({ status: "draft", assigned_groups: [] }),
+    });
+    alert("Đã thu hồi tài liệu thành công!");
+    window.closeAssignMaterialModal();
+    window.loadTeacherMaterials();
+  } catch (err) {
+    alert("Lỗi khi thu hồi tài liệu: " + err.message);
+  }
+};
+
+window.deleteMaterial = async (id) => {
+  const confirmed = confirm("Cô có chắc chắn muốn xóa tài liệu này không? Học sinh sẽ không thể tải xuống được nữa.");
+  if (!confirmed) return;
+
+  try {
+    await window.apiFetch(`/api/materials/${id}`, {
+      method: "DELETE",
+    });
+    alert("Đã xóa tài liệu thành công!");
+    window.loadTeacherMaterials();
+  } catch (err) {
+    alert("Lỗi khi xóa tài liệu: " + err.message);
+  }
+};
+

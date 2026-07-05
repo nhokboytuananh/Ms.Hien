@@ -36,6 +36,7 @@ import vocabularyRouter from './routes/vocabulary.js';
 import examRouter from './routes/exams.js';
 import aiRouter from './routes/ai.js';
 import qnaRouter from './routes/qna.js';
+import materialsRouter from './routes/materials.js';
 
 // Khởi tạo ứng dụng Express
 const app = express();
@@ -52,6 +53,7 @@ app.use('/api', assignmentRouter);
 app.use('/api', scoreRouter);
 app.use('/api', vocabularyRouter);
 app.use('/api', examRouter);
+app.use('/api', materialsRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/qna', qnaRouter);
 

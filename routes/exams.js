@@ -70,7 +70,7 @@ router.get('/exams', requireAuth, async (req, res) => {
  */
 router.put('/exams/:id', requireAuth, requireTeacher, async (req, res) => {
   const { id } = req.params;
-  const { title, grade, duration_minutes, youtube_link, questions } = req.body;
+  const { title, grade, duration_minutes, youtube_link, material_link, material_title, questions } = req.body;
 
   if (!title || !questions || !Array.isArray(questions)) {
     return res.status(400).json({ error: 'Tiêu đề đề thi và danh sách câu hỏi là bắt buộc.' });
@@ -79,8 +79,8 @@ router.put('/exams/:id', requireAuth, requireTeacher, async (req, res) => {
   try {
     // 1. Cập nhật thông tin chung đề thi
     const examUpdateRes = await db.query(
-      'UPDATE exams SET title = $1, grade = $2, duration_minutes = $3, youtube_link = $4 WHERE id = $5 RETURNING *',
-      [title, (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : 12, Number(duration_minutes) || 60, youtube_link || null, Number(id)]
+      'UPDATE exams SET title = $1, grade = $2, duration_minutes = $3, youtube_link = $4, material_link = $5, material_title = $6 WHERE id = $7 RETURNING *',
+      [title, (grade !== undefined && grade !== null && !isNaN(Number(grade))) ? Number(grade) : 12, Number(duration_minutes) || 60, youtube_link || null, material_link || null, material_title || null, Number(id)]
     );
 
     if (examUpdateRes.rows.length === 0) {
@@ -498,7 +498,7 @@ router.get('/exams/:id/export-word', requireAuth, requireTeacher, async (req, re
  * @desc Tạo một đề thi thủ công hoàn chỉnh (Chỉ dành cho Giáo viên)
  */
 router.post('/exams', requireAuth, requireTeacher, async (req, res) => {
-  const { title, exam_type, year, province, grade, duration_minutes, difficulty, youtube_link, questions } = req.body;
+  const { title, exam_type, year, province, grade, duration_minutes, difficulty, youtube_link, material_link, material_title, questions } = req.body;
 
   if (!title || !exam_type || !questions || !Array.isArray(questions) || questions.length === 0) {
     return res.status(400).json({ error: 'Thiếu thông tin đề thi hoặc danh sách câu hỏi.' });
@@ -509,8 +509,8 @@ router.post('/exams', requireAuth, requireTeacher, async (req, res) => {
 
     // 1. Lưu thông tin đề thi trước để sinh ra exam_id
     const examResult = await db.query(
-      'INSERT INTO exams (title, exam_type, year, province, grade, duration_minutes, difficulty, is_ai_generated, created_by, youtube_link) ' +
-      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *',
+      'INSERT INTO exams (title, exam_type, year, province, grade, duration_minutes, difficulty, is_ai_generated, created_by, youtube_link, material_link, material_title) ' +
+      'VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING *',
       [
         title,
         exam_type,
@@ -521,7 +521,9 @@ router.post('/exams', requireAuth, requireTeacher, async (req, res) => {
         difficulty || 'medium',
         false,
         creatorId,
-        youtube_link || null
+        youtube_link || null,
+        material_link || null,
+        material_title || null
       ]
     );
 

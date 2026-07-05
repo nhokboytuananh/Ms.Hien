@@ -71,6 +71,8 @@ CREATE TABLE exams (
   assigned_groups JSONB,
   status VARCHAR(20) DEFAULT 'draft',
   youtube_link VARCHAR(300),
+  material_link VARCHAR(300),
+  material_title VARCHAR(200),
   created_by INT REFERENCES users(id),
   created_at TIMESTAMP DEFAULT NOW()
 );
@@ -132,6 +134,17 @@ CREATE TABLE IF NOT EXISTS game_results (
   score INT NOT NULL,
   time_spent INT NOT NULL,
   game_type VARCHAR(50) DEFAULT 'unknown',
+  created_at TIMESTAMP DEFAULT NOW()
+);
+
+-- Tài liệu tham khảo
+CREATE TABLE materials (
+  id SERIAL PRIMARY KEY,
+  title VARCHAR(200) NOT NULL,
+  link VARCHAR(300) NOT NULL,
+  status VARCHAR(20) DEFAULT 'draft',
+  assigned_groups JSONB DEFAULT '[]'::jsonb,
+  created_by INT REFERENCES users(id),
   created_at TIMESTAMP DEFAULT NOW()
 );
 

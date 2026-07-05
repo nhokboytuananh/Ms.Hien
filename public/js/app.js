@@ -433,6 +433,12 @@ function triggerTabLoadData(tabName) {
   if (tabName === "t-qna" && typeof window.loadTeacherQna === "function") {
     window.loadTeacherQna();
   }
+  if (
+    tabName === "t-materials" &&
+    typeof window.loadTeacherMaterials === "function"
+  ) {
+    window.loadTeacherMaterials();
+  }
 
   // HỌC SINH
   if (tabName === "s-vocab") {
@@ -446,6 +452,12 @@ function triggerTabLoadData(tabName) {
   }
   if (tabName === "s-chat" && typeof window.loadStudentQna === "function") {
     window.loadStudentQna();
+  }
+  if (
+    tabName === "s-materials" &&
+    typeof window.loadStudentMaterials === "function"
+  ) {
+    window.loadStudentMaterials();
   }
 }
 

@@ -403,6 +403,12 @@
               <i data-lucide="message-circle-question" class="w-5 h-5"></i> Hỏi
               đáp của học sinh
             </button>
+            <button
+              data-tab="t-materials"
+              class="nav-btn flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all w-full text-left"
+            >
+              <i data-lucide="files" class="w-5 h-5"></i> Quản lý Tài liệu
+            </button>
           </nav>
 
           <!-- TIÊU ĐỀ MENU CHO HỌC SINH -->
@@ -444,6 +450,12 @@
             >
               <i data-lucide="file-search" class="w-5 h-5"></i> Phân tích văn
               bản & Đề
+            </button>
+            <button
+              data-tab="s-materials"
+              class="nav-btn flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all w-full text-left"
+            >
+              <i data-lucide="folder-open" class="w-5 h-5"></i> Tài liệu tham khảo
             </button>
           </nav>
         </aside>
@@ -968,6 +980,80 @@
                   class="p-8 text-center text-slate-500 bg-white rounded-xl border border-slate-200"
                 >
                   Đang tải danh sách câu hỏi...
+                </div>
+              </div>
+            </div>
+
+            <!-- VIEW: QUẢN LÝ TÀI LIỆU THAM KHẢO (GIÁO VIÊN) -->
+            <div id="view-t-materials" class="tab-view space-y-6 hidden">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">
+                    Quản Lý Tài Liệu Tham Khảo
+                  </h2>
+                  <p class="text-sm text-slate-500">
+                    Thêm các link tài liệu (Google Drive, Dropbox, v.v.), giao hoặc thu hồi tài liệu cho các lớp/khối học.
+                  </p>
+                </div>
+                <button
+                  onclick="window.openCreateMaterialModal()"
+                  class="shrink-0 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-md shadow-brand-500/15"
+                >
+                  <i data-lucide="plus-circle" class="w-4 h-4"></i> Thêm Tài Liệu Mới
+                </button>
+              </div>
+
+              <!-- Thống kê tài liệu -->
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                  <div class="p-3 bg-brand-50 text-brand-600 rounded-xl">
+                    <i data-lucide="files" class="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <h5 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Tổng tài liệu</h5>
+                    <span id="t-materials-total-count" class="text-2xl font-black text-slate-900">0</span>
+                  </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                  <div class="p-3 bg-emerald-50 text-emerald-600 rounded-xl">
+                    <i data-lucide="send" class="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <h5 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Đang giao cho lớp</h5>
+                    <span id="t-materials-assigned-count" class="text-2xl font-black text-slate-900">0</span>
+                  </div>
+                </div>
+                <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex items-center gap-4">
+                  <div class="p-3 bg-slate-50 text-slate-500 rounded-xl">
+                    <i data-lucide="file-minus" class="w-6 h-6"></i>
+                  </div>
+                  <div>
+                    <h5 class="text-xs text-slate-400 font-bold uppercase tracking-wider">Nháp / Chưa giao</h5>
+                    <span id="t-materials-draft-count" class="text-2xl font-black text-slate-900">0</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Danh sách tài liệu -->
+              <div class="bg-white rounded-2xl border border-slate-200 p-6 shadow-sm">
+                <div class="overflow-x-auto">
+                  <table class="w-full text-left border-collapse">
+                    <thead>
+                      <tr class="border-b border-slate-100 text-xs text-slate-400 font-bold uppercase tracking-wider">
+                        <th class="pb-3 w-5/12">Tên & Link tài liệu</th>
+                        <th class="pb-3 text-center w-2/12">Trạng thái</th>
+                        <th class="pb-3 w-3/12">Lớp được giao</th>
+                        <th class="pb-3 text-right w-2/12">Hành động</th>
+                      </tr>
+                    </thead>
+                    <tbody id="t-materials-tbody" class="text-sm divide-y divide-slate-100">
+                      <tr>
+                        <td colspan="4" class="py-8 text-center text-slate-400">
+                          Chưa có tài liệu nào được đăng lên. Hãy bấm nút phía trên để thêm nhé cô!
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
@@ -2167,12 +2253,150 @@
                 </div>
               </div>
             </div>
+
+            <!-- VIEW: TÀI LIỆU THAM KHẢO & ĐỀ CƯƠNG (HỌC SINH) -->
+            <div id="view-s-materials" class="tab-view space-y-6 hidden">
+              <div>
+                <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">
+                  Tài Liệu Tham Khảo & Đề Cương
+                </h2>
+                <p class="text-sm text-slate-500">
+                  Tải xuống các tài liệu ôn thi, đề cương ôn tập do Cô Hiền giao riêng cho lớp của em.
+                </p>
+              </div>
+
+              <!-- Lưới danh sách tài liệu -->
+              <div id="s-materials-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="col-span-full p-12 text-center text-slate-500 bg-white rounded-2xl border border-slate-200">
+                  <i data-lucide="folder-open" class="w-12 h-12 mx-auto text-slate-300 mb-3"></i>
+                  Chưa có tài liệu nào được giao cho lớp của em học.
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
     </div>
 
     <!-- ==================== 5. CÁC MODALS POPUP TƯƠNG TÁC ==================== -->
+
+    <!-- MODAL: THÊM & SỬA TÀI LIỆU THAM KHẢO (GIÁO VIÊN) -->
+    <div
+      id="material-modal"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-4"
+      >
+        <button
+          onclick="window.closeMaterialModal()"
+          class="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 rounded-full cursor-pointer transition-all"
+        >
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+        <h3 id="material-modal-title" class="text-lg font-bold text-slate-900">Thêm Tài Liệu Mới</h3>
+        <form id="material-form" onsubmit="window.saveMaterial(event)" class="space-y-4">
+          <input type="hidden" id="material-id-input" />
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 mb-1"
+              >Tên tài liệu</label
+            >
+            <input
+              type="text"
+              id="material-title-input"
+              required
+              placeholder="Ví dụ: Đề cương ôn tập HK2 tiếng Anh 9"
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500 focus:bg-white"
+            />
+          </div>
+          <div>
+            <label class="block text-xs font-bold uppercase text-slate-500 mb-1"
+              >Link tải tài liệu (Google Drive / Dropbox / OneDrive)</label
+            >
+            <input
+              type="url"
+              id="material-link-input"
+              required
+              placeholder="Ví dụ: https://drive.google.com/..."
+              class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500 focus:bg-white"
+            />
+          </div>
+          <button
+            type="submit"
+            class="w-full py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-md"
+          >
+            Lưu tài liệu
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- MODAL: GIAO TÀI LIỆU THAM KHẢO CHO LỚP/KHỐI (GIÁO VIÊN) -->
+    <div
+      id="assign-material-modal"
+      class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center p-4 z-50"
+    >
+      <div
+        class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl relative space-y-4"
+      >
+        <button
+          onclick="window.closeAssignMaterialModal()"
+          class="absolute top-4 right-4 p-2 bg-slate-100 hover:bg-slate-200 text-slate-500 hover:text-slate-700 rounded-full cursor-pointer transition-all"
+        >
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+        <h3 class="text-lg font-bold text-slate-900">Giao tài liệu tham khảo</h3>
+        <p class="text-xs text-slate-500">
+          Hãy chọn các lớp hoặc khối học mà cô muốn giao tài liệu này nhé!
+        </p>
+        <input type="hidden" id="assign-material-id" />
+        
+        <div class="space-y-3">
+          <label class="block text-xs font-bold uppercase text-slate-400">Danh sách khối lớp & Nhóm học viên</label>
+          <div class="space-y-2 max-h-[250px] overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-100">
+            <label class="flex items-center gap-3 p-2 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors text-sm font-semibold">
+              <input type="checkbox" value="all" class="material-assign-group-checkbox rounded text-brand-600 focus:ring-brand-500" />
+              <span>Tất cả khối lớp</span>
+            </label>
+            <label class="flex items-center gap-3 p-2 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors text-sm font-semibold">
+              <input type="checkbox" value="12" class="material-assign-group-checkbox rounded text-brand-600 focus:ring-brand-500" />
+              <span>Khối lớp 12</span>
+            </label>
+            <label class="flex items-center gap-3 p-2 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors text-sm font-semibold">
+              <input type="checkbox" value="11" class="material-assign-group-checkbox rounded text-brand-600 focus:ring-brand-500" />
+              <span>Khối lớp 11</span>
+            </label>
+            <label class="flex items-center gap-3 p-2 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors text-sm font-semibold">
+              <input type="checkbox" value="10" class="material-assign-group-checkbox rounded text-brand-600 focus:ring-brand-500" />
+              <span>Khối lớp 10</span>
+            </label>
+            <label class="flex items-center gap-3 p-2 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors text-sm font-semibold">
+              <input type="checkbox" value="9" class="material-assign-group-checkbox rounded text-brand-600 focus:ring-brand-500" />
+              <span>Khối lớp 9</span>
+            </label>
+            <label class="flex items-center gap-3 p-2 hover:bg-slate-100 rounded-lg cursor-pointer transition-colors text-sm font-semibold">
+              <input type="checkbox" value="0" class="material-assign-group-checkbox rounded text-brand-600 focus:ring-brand-500" />
+              <span>Học sinh tự do</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="flex gap-3 pt-2">
+          <button
+            onclick="window.revokeMaterial()"
+            class="flex-1 py-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 font-bold rounded-xl text-xs transition-all cursor-pointer flex items-center justify-center gap-2 border border-rose-100"
+          >
+            <i data-lucide="archive-restore" class="w-4 h-4"></i> Thu hồi (Ngừng giao)
+          </button>
+          <button
+            onclick="window.submitAssignMaterial()"
+            class="flex-1 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-xl text-xs transition-all cursor-pointer shadow-md flex items-center justify-center gap-2"
+          >
+            <i data-lucide="check" class="w-4 h-4"></i> Xác nhận Giao
+          </button>
+        </div>
+      </div>
+    </div>
 
     <!-- MODAL: TẠO LỚP HỌC MỚI (GIÁO VIÊN) -->
     <div
@@ -3570,6 +3794,32 @@
                 placeholder="Ví dụ: https://www.youtube.com/watch?v=dQw4w9WgXcQ"
                 class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500"
               />
+            </div>
+            <div class="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 border-t border-slate-100 pt-4 mt-2">
+              <div>
+                <label
+                  class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1"
+                  >Link tài liệu tham khảo đính kèm (Nếu có)</label
+                >
+                <input
+                  type="text"
+                  id="manual-exam-material-link"
+                  placeholder="Ví dụ: https://drive.google.com/..."
+                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500"
+                />
+              </div>
+              <div>
+                <label
+                  class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1"
+                  >Tên hiển thị tài liệu đính kèm (Ví dụ: Đề bài PDF)</label
+                >
+                <input
+                  type="text"
+                  id="manual-exam-material-title"
+                  placeholder="Ví dụ: Tải file đề kiểm tra PDF"
+                  class="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg text-sm focus:outline-none focus:border-brand-500"
+                />
+              </div>
             </div>
           </div>
 

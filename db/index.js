@@ -193,6 +193,10 @@ function loadLocalData() {
       data.game_results = [];
     }
 
+    if (!data.materials) {
+      data.materials = [];
+    }
+
     return data;
   } catch (error) {
     console.error('Không thể load database local:', error);
@@ -273,6 +277,26 @@ if (isProduction) {
           ALTER TABLE exams ADD COLUMN IF NOT EXISTS youtube_link VARCHAR(300);
         `);
         console.log('--- ĐÃ ĐẢM BẢO CỘT YOUTUBE_LINK TRONG BẢNG EXAMS THÀNH CÔNG ---');
+
+        // Đảm bảo bảng exams có cột material_link và material_title
+        await pool.query(`
+          ALTER TABLE exams ADD COLUMN IF NOT EXISTS material_link VARCHAR(300), ADD COLUMN IF NOT EXISTS material_title VARCHAR(200);
+        `);
+        console.log('--- ĐÃ ĐẢM BẢO CỘT MATERIAL_LINK VÀ MATERIAL_TITLE TRONG BẢNG EXAMS THÀNH CÔNG ---');
+
+        // Tạo bảng materials nếu chưa có
+        await pool.query(`
+          CREATE TABLE IF NOT EXISTS materials (
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(200) NOT NULL,
+            link VARCHAR(300) NOT NULL,
+            status VARCHAR(20) DEFAULT 'draft',
+            assigned_groups JSONB DEFAULT '[]'::jsonb,
+            created_by INT REFERENCES users(id),
+            created_at TIMESTAMP DEFAULT NOW()
+          );
+        `);
+        console.log('--- ĐÃ ĐẢM BẢO BẢNG MATERIALS THÀNH CÔNG ---');
 
         // Đảm bảo bảng exam_questions có cột youtube_link
         await pool.query(`
@@ -662,6 +686,7 @@ if (isProduction) {
       // 22. INSERT INTO exams
       if (queryStr.match(/insert\s+into\s+exams/i)) {
         const id = data.exams.reduce((max, e) => e.id > max ? e.id : max, 0) + 1;
+        const hasMaterial = queryStr.includes('material_link') || params.length >= 12;
         const newExam = {
           id,
           title: params[0],
@@ -674,6 +699,8 @@ if (isProduction) {
           is_ai_generated: params[7] === 'true' || params[7] === true,
           created_by: Number(params[8]),
           youtube_link: params[9] || null,
+          material_link: hasMaterial ? (params[10] || null) : null,
+          material_title: hasMaterial ? (params[11] || null) : null,
           status: 'draft',
           created_at: new Date()
         };
@@ -705,7 +732,26 @@ if (isProduction) {
             return { rows: [data.exams[idx]], rowCount: 1 };
           }
         } else {
-          if (queryStr.includes('youtube_link = $4')) {
+          if (queryStr.includes('material_link = $5')) {
+            const title = params[0];
+            const grade = Number(params[1]);
+            const duration = Number(params[2]);
+            const youtube_link = params[3];
+            const material_link = params[4];
+            const material_title = params[5];
+            const id = Number(params[6]);
+            const idx = data.exams.findIndex(e => e.id === id);
+            if (idx !== -1) {
+              data.exams[idx].title = title;
+              data.exams[idx].grade = grade;
+              data.exams[idx].duration_minutes = duration;
+              data.exams[idx].youtube_link = youtube_link;
+              data.exams[idx].material_link = material_link;
+              data.exams[idx].material_title = material_title;
+              saveLocalData(data);
+              return { rows: [data.exams[idx]], rowCount: 1 };
+            }
+          } else if (queryStr.includes('youtube_link = $4')) {
             const title = params[0];
             const grade = Number(params[1]);
             const duration = Number(params[2]);
@@ -932,6 +978,66 @@ if (isProduction) {
         }).slice(0, 5);
 
         return { rows, rowCount: rows.length };
+      }
+
+      // 31. SELECT * FROM materials
+      if (queryStr.match(/select\s+\*\s+from\s+materials/i)) {
+        if (!data.materials) data.materials = [];
+        const sorted = [...data.materials].sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        return { rows: sorted, rowCount: sorted.length };
+      }
+
+      // 32. INSERT INTO materials (title, link, status, assigned_groups, created_by) VALUES ($1, $2, $3, $4, $5) RETURNING *
+      if (queryStr.match(/insert\s+into\s+materials/i)) {
+        if (!data.materials) data.materials = [];
+        const id = data.materials.reduce((max, m) => m.id > max ? m.id : max, 0) + 1;
+        const newMaterial = {
+          id,
+          title: params[0],
+          link: params[1],
+          status: params[2] || 'draft',
+          assigned_groups: params[3] ? (typeof params[3] === 'string' ? JSON.parse(params[3]) : params[3]) : [],
+          created_by: Number(params[4]),
+          created_at: new Date()
+        };
+        data.materials.push(newMaterial);
+        saveLocalData(data);
+        return { rows: [newMaterial], rowCount: 1 };
+      }
+
+      // 33. UPDATE materials SET title = $1, link = $2 WHERE id = $3 RETURNING *
+      if (queryStr.match(/update\s+materials\s+set\s+title\s*=\s*\$1,\s*link\s*=\s*\$2\s+where\s+id\s*=\s*\$3/i)) {
+        const id = Number(params[2]);
+        const idx = data.materials.findIndex(m => m.id === id);
+        if (idx !== -1) {
+          data.materials[idx].title = params[0];
+          data.materials[idx].link = params[1];
+          saveLocalData(data);
+          return { rows: [data.materials[idx]], rowCount: 1 };
+        }
+        return { rows: [], rowCount: 0 };
+      }
+
+      // 34. UPDATE materials SET status = $1, assigned_groups = $2 WHERE id = $3 RETURNING *
+      if (queryStr.match(/update\s+materials\s+set\s+status\s*=\s*\$1,\s*assigned_groups\s*=\s*\$2\s+where\s+id\s*=\s*\$3/i)) {
+        const id = Number(params[2]);
+        const idx = data.materials.findIndex(m => m.id === id);
+        if (idx !== -1) {
+          data.materials[idx].status = params[0];
+          data.materials[idx].assigned_groups = typeof params[1] === 'string' ? JSON.parse(params[1]) : params[1];
+          saveLocalData(data);
+          return { rows: [data.materials[idx]], rowCount: 1 };
+        }
+        return { rows: [], rowCount: 0 };
+      }
+
+      // 35. DELETE FROM materials WHERE id = $1
+      if (queryStr.match(/delete\s+from\s+materials\s+where\s+id\s*=\s*\$1/i)) {
+        const id = Number(params[0]);
+        const initialLen = data.materials ? data.materials.length : 0;
+        data.materials = (data.materials || []).filter(m => m.id !== id);
+        saveLocalData(data);
+        return { rowCount: initialLen - data.materials.length };
       }
 
       // Fallback mặc định cho các câu truy vấn khác (trả về mảng rỗng để không crash)
