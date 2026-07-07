@@ -1,6 +1,6 @@
 {
   "name": "Ms. Hiền - Học Tiếng Anh THPT",
-  "description": "Hệ thống học tập Tiếng Anh THPT thông minh tích hợp AI cho Giáo viên và Học sinh",
+  "description": "Hệ thống học tập Tiếng Anh THPT & IELTS chuẩn IELTS Fighter với Trợ lý ảo Ms. Hiền thông minh tương tác trực quan",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

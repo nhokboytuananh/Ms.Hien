@@ -65,35 +65,152 @@
       ::-webkit-scrollbar-thumb:hover {
         background: #94a3b8;
       }
+
+      /* Hoạt ảnh Cô Hiền Companion */
+      @keyframes floatHien {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-8px); }
+      }
+      @keyframes waveHand {
+        0%, 100% { transform: rotate(0deg); }
+        25% { transform: rotate(-12deg); }
+        75% { transform: rotate(8deg); }
+      }
+      @keyframes blinkEyes {
+        0%, 90%, 100% { transform: scaleY(1); }
+        95% { transform: scaleY(0.1); }
+      }
+      @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(4px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      .animate-float-hien {
+        animation: floatHien 4s ease-in-out infinite;
+      }
+      .animate-wave-hand {
+        animation: waveHand 1.5s ease-in-out infinite;
+      }
+      .animate-blink-eyes {
+        animation: blinkEyes 4s infinite;
+        transform-origin: center;
+      }
     </style>
   </head>
   <body class="bg-slate-50 text-slate-800 font-sans min-h-screen flex flex-col">
     <!-- ==================== 1. MÀN HÌNH ĐĂNG NHẬP / ĐĂNG KÝ ==================== -->
     <div
       id="auth-screen"
-      class="flex-1 flex items-center justify-center p-4 py-12 md:py-20 bg-gradient-to-tr from-brand-900 via-brand-800 to-slate-900"
+      class="flex-1 flex items-center justify-center p-4 py-8 md:py-16 bg-gradient-to-tr from-brand-950 via-brand-900 to-slate-950 min-h-screen"
     >
       <div
-        class="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden transition-all duration-300"
+        class="bg-white rounded-3xl shadow-2xl w-full max-w-5xl overflow-hidden transition-all duration-300 grid grid-cols-1 lg:grid-cols-12"
       >
-        <!-- Banner phía trên -->
-        <div
-          class="bg-gradient-to-r from-brand-600 to-brand-700 p-8 text-white text-center relative"
-        >
-          <div
-            class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"
-          ></div>
-          <div class="inline-flex p-3 bg-white/20 rounded-xl mb-3">
-            <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+        <!-- Cột trái: Panel quảng cáo chương trình dạy của Cô Hiền -->
+        <div class="flex lg:col-span-6 bg-gradient-to-br from-brand-800 to-slate-900 text-white p-6 sm:p-8 flex-col justify-between relative overflow-hidden">
+          <div class="absolute -top-20 -left-20 w-80 h-80 bg-brand-500/20 rounded-full blur-3xl"></div>
+          <div class="absolute -bottom-20 -right-20 w-80 h-80 bg-emerald-500/10 rounded-full blur-3xl"></div>
+          
+          <!-- Nội dung quảng cáo -->
+          <div class="relative z-10 space-y-6">
+            <div class="flex items-center gap-2">
+              <span class="px-3 py-1 bg-white/10 rounded-full text-[10px] font-black uppercase tracking-wider text-brand-300 border border-white/10 flex items-center gap-1">
+                <i data-lucide="award" class="w-3.5 h-3.5 text-amber-400"></i> Chương Trình Đào Tạo Trọng Tâm
+              </span>
+            </div>
+            
+            <div class="space-y-2">
+              <h2 class="text-2xl font-black leading-tight tracking-tight bg-gradient-to-r from-white via-brand-100 to-brand-300 bg-clip-text text-transparent font-sans">
+                Bứt Phá Điểm Số 9+<br>Tiếng Anh THPT Quốc Gia
+              </h2>
+              <p class="text-slate-300 text-xs leading-relaxed">
+                Được biên soạn và giảng dạy độc quyền bởi <strong class="text-white">Cô Hiền</strong> - Giáo viên chuyên luyện thi chất lượng cao THPT Quốc Gia.
+              </p>
+            </div>
+
+            <!-- Các đặc quyền nổi bật -->
+            <div class="space-y-4 pt-2">
+              <div class="flex items-start gap-3">
+                <div class="p-2 bg-white/10 rounded-xl text-brand-300 border border-white/5 shrink-0 mt-0.5">
+                  <i data-lucide="target" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-xs text-slate-100">Bám sát cấu trúc đề mới của Bộ</h4>
+                  <p class="text-[11px] text-slate-400 leading-relaxed mt-0.5">Hệ thống ngân hàng câu hỏi ôn luyện sát với ma trận đề thi THPT thực tế.</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="p-2 bg-white/10 rounded-xl text-emerald-300 border border-white/5 shrink-0 mt-0.5">
+                  <i data-lucide="brain-circuit" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-xs text-slate-100">Học từ vựng thông minh qua Game</h4>
+                  <p class="text-[11px] text-slate-400 leading-relaxed mt-0.5">Không còn học vẹt! Ghi nhớ sâu bằng Flashcard lật và game so tài tương tác.</p>
+                </div>
+              </div>
+
+              <div class="flex items-start gap-3">
+                <div class="p-2 bg-white/10 rounded-xl text-amber-300 border border-white/5 shrink-0 mt-0.5">
+                  <i data-lucide="message-square" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <h4 class="font-extrabold text-xs text-slate-100">Trợ lý ảo AI giải bài & chấm điểm 24/7</h4>
+                  <p class="text-[11px] text-slate-400 leading-relaxed mt-0.5">AI thông minh luôn túc trực, phân tích đáp án chi tiết và chỉ ra lỗi sai kịp thời.</p>
+                </div>
+              </div>
+            </div>
           </div>
-          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
-            Hệ Thống Tiếng Anh Ms. Hiền
-          </h1>
-          <p class="text-brand-100 text-sm mt-1">
-            Nền tảng học Tiếng Anh thông minh hỗ trợ AI dành cho Giáo viên & Học
-            sinh THPT
-          </p>
+
+          <!-- Banner học viên tiêu biểu & Thống kê -->
+          <div class="relative z-10 border-t border-white/10 pt-4 mt-4">
+            <div class="grid grid-cols-3 gap-2 text-center">
+              <div>
+                <div class="text-lg font-black text-brand-300">98.5%</div>
+                <div class="text-[9px] text-slate-400 uppercase tracking-wider font-bold mt-1">Đạt mục tiêu 8+</div>
+              </div>
+              <div class="border-x border-white/10">
+                <div class="text-lg font-black text-emerald-400">9.2</div>
+                <div class="text-[9px] text-slate-400 uppercase tracking-wider font-bold mt-1">Điểm trung bình</div>
+              </div>
+              <div>
+                <div class="text-lg font-black text-amber-400">5.000+</div>
+                <div class="text-[9px] text-slate-400 uppercase tracking-wider font-bold mt-1">Học viên tin dùng</div>
+              </div>
+            </div>
+            
+            <div class="flex items-center gap-3 mt-4 bg-white/5 border border-white/10 rounded-2xl p-2.5">
+              <div class="w-8 h-8 rounded-full overflow-hidden flex items-center justify-center border border-white/20 shrink-0">
+                <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&q=80&w=200" alt="Cô Hiền" class="w-full h-full object-cover">
+              </div>
+              <div>
+                <div class="text-[11px] font-bold text-slate-100">Lớp học Cô Hiền</div>
+                <div class="text-[9px] text-slate-400 font-medium">Bứt phá điểm thi THPT - Làm chủ tương lai</div>
+              </div>
+            </div>
+          </div>
         </div>
+
+        <!-- Cột phải: Form đăng nhập -->
+        <div class="lg:col-span-6 flex flex-col justify-between">
+          <!-- Banner phía trên -->
+          <div
+            class="bg-gradient-to-r from-brand-600 to-brand-700 p-8 text-white text-center relative"
+          >
+            <div
+              class="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full blur-2xl"
+            ></div>
+            <div class="inline-flex p-3 bg-white/20 rounded-xl mb-3">
+              <i data-lucide="graduation-cap" class="w-8 h-8"></i>
+            </div>
+            <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+              Hệ Thống Tiếng Anh Cô Hiền
+            </h1>
+            <p class="text-brand-100 text-sm mt-1">
+              Nền tảng học Tiếng Anh thông minh hỗ trợ AI dành cho Giáo viên & Học
+              sinh THPT
+            </p>
+          </div>
 
         <!-- Khung biểu mẫu -->
         <div class="p-8">
@@ -300,6 +417,7 @@
         </div>
       </div>
     </div>
+  </div>
 
     <!-- ==================== 2. MÀN HÌNH CHÍNH (SAU KHI ĐĂNG NHẬP) ==================== -->
     <div id="main-screen" class="hidden flex-1 flex flex-col">
@@ -379,8 +497,14 @@
             class="hidden flex md:flex-col gap-1 w-full shrink-0"
           >
             <button
-              data-tab="t-classes"
+              data-tab="t-home"
               class="nav-btn active flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold bg-brand-500/10 text-brand-400 transition-all w-full text-left"
+            >
+              <i data-lucide="home" class="w-5 h-5"></i> Trang chủ Cô Hiền
+            </button>
+            <button
+              data-tab="t-classes"
+              class="nav-btn flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all w-full text-left"
             >
               <i data-lucide="users" class="w-5 h-5"></i> Lớp học & Học sinh
             </button>
@@ -424,8 +548,14 @@
             class="hidden flex md:flex-col gap-1 w-full shrink-0"
           >
             <button
-              data-tab="s-exams"
+              data-tab="s-home"
               class="nav-btn active flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-bold bg-brand-500/10 text-brand-400 transition-all w-full text-left"
+            >
+              <i data-lucide="home" class="w-5 h-5"></i> Trang chủ Cô Hiền
+            </button>
+            <button
+              data-tab="s-exams"
+              class="nav-btn flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-slate-400 hover:bg-slate-800 hover:text-slate-200 transition-all w-full text-left"
             >
               <i data-lucide="pen-tool" class="w-5 h-5"></i> Luyện thi trực
               tuyến
@@ -465,8 +595,164 @@
           <div id="main-content-area" class="space-y-6">
             <!-- ==================== CÁC VIEW DÀNH CHO GIÁO VIÊN ==================== -->
 
+            <!-- VIEW: TRANG CHỦ GIỚI THIỆU (GIÁO VIÊN) -->
+            <div id="view-t-home" class="tab-view space-y-6">
+              <!-- Banner chào mừng -->
+              <div class="relative overflow-hidden bg-gradient-to-r from-brand-600 to-brand-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-brand-500/15 animate-[fadeIn_0.5s_ease-out]">
+                <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="relative z-10 max-w-2xl space-y-3">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 text-brand-100 rounded-full text-xs font-bold uppercase tracking-wider">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Cổng Sư Phạm AI
+                  </span>
+                  <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight">
+                    Hệ Thống Tiếng Anh Cô Hiền - Ôn Thi THPT Quốc Gia
+                  </h1>
+                  <p class="text-sm sm:text-base text-brand-100 leading-relaxed font-medium">
+                    Chào mừng cô đến với phòng làm việc thông minh! Nơi cô có thể quản lý lớp học, soạn đề thi tự động với Trí Tuệ Nhân Tạo, và theo dõi tiến độ luyện tập của học sinh một cách trực quan, khoa học.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Lộ trình giới thiệu THPT -->
+              <div class="space-y-4">
+                <h3 class="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                  <i data-lucide="compass" class="text-brand-500 w-5 h-5"></i>
+                  Lộ trình đào tạo Tiếng Anh THPT Quốc Gia chuẩn đầu ra
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <!-- Card 1 -->
+                  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 hover:border-brand-300 transition-all">
+                    <div>
+                      <span class="px-2 py-0.5 bg-brand-50 text-brand-600 rounded text-[10px] font-extrabold uppercase">GIAI ĐOẠN 1</span>
+                      <h4 class="font-extrabold text-slate-900 text-sm mt-1">Lấy gốc Ngữ pháp & Phát âm</h4>
+                      <p class="text-xs text-slate-500 mt-1">
+                        Hệ thống hóa 12 thì cơ bản, các từ loại, câu bị động, câu điều kiện, mệnh đề quan hệ và phát âm IPA chuẩn xác để ăn chắc điểm ngữ pháp.
+                      </p>
+                    </div>
+                    <div class="text-[11px] font-bold text-brand-600 flex items-center gap-1">
+                      <i data-lucide="check-circle-2" class="w-4 h-4 text-brand-500"></i> Mục tiêu: 5.0 - 6.0 điểm
+                    </div>
+                  </div>
+                  <!-- Card 2 -->
+                  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 hover:border-brand-300 transition-all">
+                    <div>
+                      <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[10px] font-extrabold uppercase">GIAI ĐOẠN 2</span>
+                      <h4 class="font-extrabold text-slate-900 text-sm mt-1">Bứt phá Từ vựng & Đọc hiểu</h4>
+                      <p class="text-xs text-slate-500 mt-1">
+                        Tích lũy từ vựng theo chủ đề trọng tâm lớp 10, 11, 12, rèn luyện kỹ năng làm bài điền từ và đọc hiểu ngắn hiệu quả.
+                      </p>
+                    </div>
+                    <div class="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
+                      <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-500"></i> Mục tiêu: 7.0 - 8.0 điểm
+                    </div>
+                  </div>
+                  <!-- Card 3 -->
+                  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 hover:border-brand-300 transition-all">
+                    <div>
+                      <span class="px-2 py-0.5 bg-amber-50 text-amber-600 rounded text-[10px] font-extrabold uppercase">GIAI ĐOẠN 3</span>
+                      <h4 class="font-extrabold text-slate-900 text-sm mt-1">Chiến thuật Luyện đề THPT</h4>
+                      <p class="text-xs text-slate-500 mt-1">
+                        Thực chiến giải đề thi thử sát với cấu trúc minh họa của Bộ GD&ĐT, nhận diện các bẫy thường gặp và tối ưu hóa thời gian làm bài.
+                      </p>
+                    </div>
+                    <div class="text-[11px] font-bold text-amber-600 flex items-center gap-1">
+                      <i data-lucide="check-circle-2" class="w-4 h-4 text-amber-500"></i> Mục tiêu: 8.0 - 9.0 điểm
+                    </div>
+                  </div>
+                  <!-- Card 4 -->
+                  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col justify-between gap-3 hover:border-brand-300 transition-all">
+                    <div>
+                      <span class="px-2 py-0.5 bg-rose-50 text-rose-600 rounded text-[10px] font-extrabold uppercase">GIAI ĐOẠN 4</span>
+                      <h4 class="font-extrabold text-slate-900 text-sm mt-1">Về đích 9+ nâng cao</h4>
+                      <p class="text-xs text-slate-500 mt-1">
+                        Chinh phục nhóm câu phân loại: Collocations, Idioms, Phrasal verbs và các bài đọc hiểu chuyên sâu bứt phá điểm số tối đa.
+                      </p>
+                    </div>
+                    <div class="text-[11px] font-bold text-rose-600 flex items-center gap-1">
+                      <i data-lucide="check-circle-2" class="w-4 h-4 text-rose-500"></i> Mục tiêu: Bứt phá điểm 9.5+
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Hướng dẫn nhanh cho cô -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Cột trái: Giới thiệu tính năng quản lý -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                  <h4 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                    <i data-lucide="laptop" class="text-brand-500 w-5 h-5"></i>
+                    Bản đồ Tính năng Công nghệ cho Giáo viên
+                  </h4>
+                  <ul class="space-y-3.5 text-xs text-slate-600 font-medium">
+                    <li class="flex items-start gap-3">
+                      <div class="p-1.5 bg-brand-50 text-brand-600 rounded-lg shrink-0">
+                        <i data-lucide="users" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <strong class="text-slate-800 block text-sm">Lớp học & Học sinh</strong>
+                        Tạo lớp mới, xem danh sách học sinh đăng ký, quản lý điểm và xem lịch sử làm đề thi cụ thể của từng em.
+                      </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <div class="p-1.5 bg-emerald-50 text-emerald-600 rounded-lg shrink-0">
+                        <i data-lucide="book-open" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <strong class="text-slate-800 block text-sm">Quản lý Từ vựng</strong>
+                        Thêm từ vựng mới cho các lớp, hoặc nhập nhanh từ file Excel. Học sinh sẽ làm flashcard hoặc chơi game ghép chữ với kho này.
+                      </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <div class="p-1.5 bg-amber-50 text-amber-600 rounded-lg shrink-0">
+                        <i data-lucide="sparkles" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <strong class="text-slate-800 block text-sm">Đề thi & Soạn bài AI</strong>
+                        Tự soạn đề trắc nghiệm thủ công HOẶC ra lệnh cho AI soạn đề thi thử bám sát đề minh họa THPT trong 15 giây!
+                      </div>
+                    </li>
+                    <li class="flex items-start gap-3">
+                      <div class="p-1.5 bg-purple-50 text-purple-600 rounded-lg shrink-0">
+                        <i data-lucide="files" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <strong class="text-slate-800 block text-sm">Quản lý tài liệu học tập</strong>
+                        Đăng tải file PDF bài học, link bài tập Google Drive, giáo án ôn thi và giao đến cho từng khối lớp.
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+
+                <!-- Cột phải: Khẩu hiệu truyền cảm hứng & trợ lý Cô Hiền -->
+                <div class="bg-gradient-to-tr from-slate-900 to-brand-950 text-white rounded-3xl p-6 shadow-sm relative flex flex-col justify-between overflow-hidden">
+                  <div class="absolute -bottom-10 -right-10 w-40 h-40 bg-brand-500/20 rounded-full blur-3xl"></div>
+                  <div class="space-y-4 relative z-10">
+                    <span class="px-2 py-0.5 bg-brand-500/30 text-brand-300 rounded text-[10px] font-extrabold uppercase tracking-widest">
+                      Kinh nghiệm sư phạm
+                    </span>
+                    <h4 class="text-lg font-extrabold tracking-tight">Sứ mệnh giảng dạy thời đại số</h4>
+                    <p class="text-slate-300 text-xs leading-relaxed italic">
+                      "Phương pháp giảng dạy thông minh không chỉ cung cấp kiến thức, mà là khơi dậy ngọn lửa ham học trong mỗi học viên. Trí tuệ nhân tạo là cánh tay nối dài giúp chúng ta cá nhân hóa lộ trình, không để học sinh nào bị bỏ lại phía sau."
+                    </p>
+                    <div class="flex items-center gap-3 pt-2">
+                      <div class="w-10 h-10 rounded-full bg-brand-500 flex items-center justify-center font-black text-brand-100">
+                        H
+                      </div>
+                      <div>
+                        <h5 class="text-xs font-bold">Cô Hiền</h5>
+                        <p class="text-[10px] text-brand-300">Giáo viên Tiếng Anh THPT</p>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="pt-6 relative z-10 border-t border-white/10 mt-6 text-xs text-brand-200 font-bold flex items-center gap-2">
+                    <i data-lucide="heart" class="w-4 h-4 text-rose-500 fill-rose-500"></i> Hãy cùng học sinh tạo nên những bứt phá ngoạn mục cô nhé!
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- VIEW: LỚP HỌC & HỌC SINH -->
-            <div id="view-t-classes" class="tab-view space-y-6">
+            <div id="view-t-classes" class="tab-view space-y-6 hidden">
               <div class="flex items-center justify-between">
                 <div>
                   <h2
@@ -1059,6 +1345,159 @@
             </div>
 
             <!-- ==================== CÁC VIEW DÀNH CHO HỌC SINH ==================== -->
+
+            <!-- VIEW: TRANG CHỦ GIỚI THIỆU (HỌC SINH) -->
+            <div id="view-s-home" class="tab-view space-y-6">
+              <!-- Banner chào mừng học sinh -->
+              <div class="relative overflow-hidden bg-gradient-to-r from-brand-600 to-brand-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-brand-500/15 animate-[fadeIn_0.5s_ease-out]">
+                <div class="absolute -top-12 -right-12 w-48 h-48 bg-white/10 rounded-full blur-3xl"></div>
+                <div class="relative z-10 max-w-2xl space-y-3">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 text-brand-100 rounded-full text-xs font-bold uppercase tracking-wider">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> Chào các em học sinh yêu quý!
+                  </span>
+                  <h1 class="text-2xl sm:text-4xl font-extrabold tracking-tight font-sans">
+                    Học Tiếng Anh Cô Hiền - Ôn Thi THPT Quốc Gia đột phá!
+                  </h1>
+                  <p class="text-sm sm:text-base text-brand-100 leading-relaxed font-medium">
+                    Hãy chuẩn bị sẵn sàng để bứt phá điểm số tối đa! Với sự đồng hành trực tiếp của Cô Hiền và Trợ lý ảo AI thông minh, em sẽ được trải nghiệm phương pháp học chủ động đầy thú vị và cực kỳ hiệu quả.
+                  </p>
+                </div>
+              </div>
+
+              <!-- Lộ trình học viên chuẩn THPT -->
+              <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-lg font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                    <i data-lucide="compass" class="text-brand-500 w-5 h-5"></i>
+                    Lộ trình chinh phục điểm cao Tiếng Anh THPT
+                  </h3>
+                  <span class="text-xs text-brand-600 font-bold hover:underline cursor-pointer flex items-center gap-1">
+                    Bản đồ chi tiết <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                  </span>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                  <!-- Lộ trình 1 -->
+                  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-brand-400 hover:shadow-md transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-brand-50 rounded-bl-full flex items-start justify-end p-2 text-brand-600 font-extrabold text-xs transition-colors group-hover:bg-brand-500 group-hover:text-white">
+                      1
+                    </div>
+                    <div class="space-y-2 mt-2">
+                      <span class="px-2 py-0.5 bg-brand-50 text-brand-600 rounded text-[10px] font-bold uppercase">GIAI ĐOẠN 1 (5.0 - 6.0)</span>
+                      <h4 class="font-extrabold text-slate-900 text-sm">Lấy gốc Ngữ pháp & Phát âm</h4>
+                      <p class="text-xs text-slate-500 leading-relaxed">
+                        Hệ thống hóa 12 thì cơ bản, các từ loại, câu bị động, câu điều kiện, mệnh đề quan hệ và phát âm IPA chuẩn xác để ăn chắc điểm ngữ pháp.
+                      </p>
+                    </div>
+                  </div>
+                  <!-- Lộ trình 2 -->
+                  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-emerald-400 hover:shadow-md transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-emerald-50 rounded-bl-full flex items-start justify-end p-2 text-emerald-600 font-extrabold text-xs transition-colors group-hover:bg-emerald-500 group-hover:text-white">
+                      2
+                    </div>
+                    <div class="space-y-2 mt-2">
+                      <span class="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[10px] font-bold uppercase">GIAI ĐOẠN 2 (7.0 - 8.0)</span>
+                      <h4 class="font-extrabold text-slate-900 text-sm">Bứt phá Từ vựng & Đọc hiểu</h4>
+                      <p class="text-xs text-slate-500 leading-relaxed">
+                        Tích lũy từ vựng theo chủ đề trọng tâm lớp 10, 11, 12, rèn luyện kỹ năng làm bài điền từ và đọc hiểu ngắn hiệu quả.
+                      </p>
+                    </div>
+                  </div>
+                  <!-- Lộ trình 3 -->
+                  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-amber-400 hover:shadow-md transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-amber-50 rounded-bl-full flex items-start justify-end p-2 text-amber-600 font-extrabold text-xs transition-colors group-hover:bg-amber-500 group-hover:text-white">
+                      3
+                    </div>
+                    <div class="space-y-2 mt-2">
+                      <span class="px-2 py-0.5 bg-amber-50 text-amber-600 rounded text-[10px] font-bold uppercase">GIAI ĐOẠN 3 (8.0 - 9.0)</span>
+                      <h4 class="font-extrabold text-slate-900 text-sm">Chiến thuật Luyện đề THPT</h4>
+                      <p class="text-xs text-slate-500 leading-relaxed">
+                        Thực chiến giải đề thi thử sát với cấu trúc minh họa của Bộ GD&ĐT, nhận diện các bẫy thường gặp và tối ưu hóa thời gian làm bài.
+                      </p>
+                    </div>
+                  </div>
+                  <!-- Lộ trình 4 -->
+                  <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm hover:border-rose-400 hover:shadow-md transition-all relative overflow-hidden group">
+                    <div class="absolute top-0 right-0 w-16 h-16 bg-rose-50 rounded-bl-full flex items-start justify-end p-2 text-rose-600 font-extrabold text-xs transition-colors group-hover:bg-rose-500 group-hover:text-white">
+                      4
+                    </div>
+                    <div class="space-y-2 mt-2">
+                      <span class="px-2 py-0.5 bg-rose-50 text-rose-600 rounded text-[10px] font-bold uppercase">GIAI ĐOẠN 4 (9.5+)</span>
+                      <h4 class="font-extrabold text-slate-900 text-sm">Về đích 9+ nâng cao</h4>
+                      <p class="text-xs text-slate-500 leading-relaxed">
+                        Chinh phục nhóm câu phân loại: Collocations, Idioms, Phrasal verbs và các bài đọc hiểu chuyên sâu bứt phá điểm số tối đa.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tiện ích tính năng nổi bật -->
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Cột trái: Hướng dẫn học tập -->
+                <div class="bg-white rounded-3xl border border-slate-200 p-6 shadow-sm space-y-4">
+                  <h4 class="text-base font-extrabold text-slate-900 tracking-tight flex items-center gap-2">
+                    <i data-lucide="book-open" class="text-brand-500 w-5 h-5"></i>
+                    Bí quyết tự học hiệu quả trên hệ thống của Cô Hiền
+                  </h4>
+                  <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
+                    <div class="flex gap-3">
+                      <div class="w-6 h-6 rounded-full bg-brand-50 text-brand-600 flex items-center justify-center font-bold shrink-0">
+                        A
+                      </div>
+                      <div>
+                        <strong class="text-slate-800">Kiểm tra từ vựng hàng ngày:</strong> Sử dụng công cụ Flashcard lật thông minh và các game ghép chữ, điền từ để ghim từ vựng sâu vào trí nhớ dài hạn.
+                      </div>
+                    </div>
+                    <div class="flex gap-3">
+                      <div class="w-6 h-6 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold shrink-0">
+                        B
+                      </div>
+                      <div>
+                        <strong class="text-slate-800">Luyện thi có chấm điểm AI:</strong> Trải nghiệm cảm giác làm bài thi thật với đồng hồ đếm ngược, nộp bài nhận kết quả và được giải thích cực kỳ chi tiết từng câu.
+                      </div>
+                    </div>
+                    <div class="flex gap-3">
+                      <div class="w-6 h-6 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center font-bold shrink-0">
+                        C
+                      </div>
+                      <div>
+                        <strong class="text-slate-800">Trò chuyện với Cô Hiền AI:</strong> Có bất kỳ câu hỏi ngữ pháp hay thắc mắc về từ mới, vào mục Hỏi đáp AI để trò chuyện, hỏi cô giải nghĩa tức thì nhé.
+                      </div>
+                    </div>
+                    <div class="flex gap-3">
+                      <div class="w-6 h-6 rounded-full bg-rose-50 text-rose-600 flex items-center justify-center font-bold shrink-0">
+                        D
+                      </div>
+                      <div>
+                        <strong class="text-slate-800">Tận dụng tài liệu giáo trình:</strong> Hãy thường xuyên truy cập mục Tài liệu tham khảo để tải xuống đề cương và tài liệu đính kèm từ cô nhé!
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Cột phải: Góc truyền cảm hứng học tập -->
+                <div class="bg-slate-900 text-white rounded-3xl p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
+                  <div class="absolute -top-10 -right-10 w-40 h-40 bg-brand-500/20 rounded-full blur-3xl"></div>
+                  <div class="space-y-4 relative z-10">
+                    <span class="px-2.5 py-1 bg-amber-500/20 text-amber-300 rounded-full text-[10px] font-black uppercase tracking-wider flex items-center gap-1 w-fit">
+                      <i data-lucide="trophy" class="w-3.5 h-3.5"></i> Góc Truyền Cảm Hứng
+                    </span>
+                    <h4 class="text-lg font-extrabold tracking-tight">Believing in yourself is the first secret of success!</h4>
+                    <p class="text-slate-300 text-xs leading-relaxed italic">
+                      "Học tiếng Anh không phải là một đích đến ngắn hạn, mà là một hành trình mở ra những chân trời cơ hội mới. Mỗi từ vựng em ghi nhớ, mỗi đề thi em hoàn thành hôm nay là một viên gạch vững chắc xây dựng tương lai thành công của em sau này. Đừng nản chí, cô luôn đồng hành và hỗ trợ em!"
+                    </p>
+                    <p class="text-right text-xs font-bold text-brand-300">— Cô Hiền</p>
+                  </div>
+                  <div class="pt-4 border-t border-white/10 mt-6 flex justify-between items-center text-xs text-slate-400 relative z-10">
+                    <span class="flex items-center gap-1">
+                      <i data-lucide="heart" class="text-rose-500 fill-rose-500 w-4 h-4"></i> Cô Hiền & AI trợ lực
+                    </span>
+                    <span class="font-bold text-brand-300">#KeepLearning</span>
+                  </div>
+                </div>
+              </div>
+            </div>
 
             <!-- VIEW: HỌC TỪ VỰNG & GAME FLASHCARD -->
             <div id="view-s-vocab" class="tab-view space-y-6 hidden">
@@ -2276,6 +2715,108 @@
           </div>
         </main>
       </div>
+
+      <!-- CO HIEN COMPANION FLOATING INTERACTIVE CHARACTER -->
+      <div id="co-hien-companion" class="fixed bottom-6 right-6 z-50 flex flex-col items-end gap-2 pointer-events-none">
+        <!-- Speech Bubble -->
+        <div id="co-hien-bubble" class="bg-slate-900/95 backdrop-blur-md border border-brand-500/30 text-white p-3.5 rounded-2xl shadow-2xl w-60 sm:w-64 text-xs font-semibold pointer-events-auto cursor-pointer transition-all hover:scale-[1.02] active:scale-95 flex flex-col gap-1 relative mr-2">
+          <!-- Close button -->
+          <button onclick="event.stopPropagation(); window.toggleCompanion(false)" class="absolute top-2.5 right-2.5 text-slate-400 hover:text-white transition-colors p-1 rounded-full hover:bg-white/10 flex items-center justify-center pointer-events-auto" title="Thu gọn trợ lý">
+            <i data-lucide="x" class="w-3.5 h-3.5"></i>
+          </button>
+          
+          <!-- Triangle pointer -->
+          <div class="absolute bottom-[-6px] right-8 w-3 h-3 bg-slate-900 border-r border-b border-brand-500/30 rotate-45"></div>
+          <div class="flex items-center gap-1 text-brand-400 text-[10px] font-bold uppercase tracking-wider pr-6">
+            <span class="flex h-1.5 w-1.5 relative">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-brand-500"></span>
+            </span>
+            Cô Hiền Đang Trò Chuyện
+          </div>
+          <p id="co-hien-speech-text" class="text-slate-200 leading-relaxed pr-2">
+            Chào các em yêu quý! Hãy nhấn vào cô để bắt đầu bài học tiếng Anh thú vị hôm nay nhé!
+          </p>
+          <span class="text-[9px] text-slate-500 italic mt-1 text-right">Nhấn vào cô để đổi câu nói ✨</span>
+        </div>
+
+        <!-- Mascot Button containing Custom Animated SVG -->
+        <button id="co-hien-mascot-btn" onclick="window.speakCompanion()" class="w-20 h-20 sm:w-24 sm:h-24 pointer-events-auto cursor-pointer focus:outline-none focus:ring-0 active:scale-90 transition-transform duration-200 flex items-center justify-center bg-transparent relative">
+          <!-- Audio Wave effect when talking -->
+          <div id="co-hien-wave-ring" class="absolute inset-0 bg-brand-500/20 rounded-full scale-100 opacity-0 pointer-events-none transition-all duration-300"></div>
+          
+          <svg class="w-full h-full animate-float-hien" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <!-- Hair back -->
+            <path d="M20 50C20 28 35 15 50 15C65 15 80 28 80 50C80 56 78 62 76 66C75 68 72 70 70 70H30C28 70 25 68 24 66C22 62 20 56 20 50Z" fill="#334155" />
+            <circle cx="50" cy="15" r="10" fill="#334155" /> <!-- Bun -->
+            <circle cx="50" cy="15" r="6" fill="#ec4899" /> <!-- Hairband pink -->
+            
+            <!-- Ears -->
+            <circle cx="28" cy="50" r="5" fill="#fed7aa" />
+            <circle cx="72" cy="50" r="5" fill="#fed7aa" />
+
+            <!-- Face -->
+            <circle cx="50" cy="50" r="22" fill="#fed7aa" />
+            
+            <!-- Hair bangs & locks -->
+            <path d="M28 42C35 32 45 32 50 36C55 32 65 32 72 42C73 45 72 50 72 50C72 50 68 44 50 44C32 44 28 50 28 50C28 50 27 45 28 42Z" fill="#334155" />
+            <path d="M28 42C26 46 25 54 26 58C27 59 28 59 28 58C28 54 29 48 30 44" fill="#334155" />
+            <path d="M72 42C74 46 75 54 74 58C73 59 72 59 72 58C72 54 71 48 70 44" fill="#334155" />
+
+            <!-- Glasses -->
+            <rect x="34" y="44" width="12" height="10" rx="3" stroke="#db2777" stroke-width="2" fill="#db2777" fill-opacity="0.1" />
+            <rect x="54" y="44" width="12" height="10" rx="3" stroke="#db2777" stroke-width="2" fill="#db2777" fill-opacity="0.1" />
+            <path d="M46 48H54" stroke="#db2777" stroke-width="2" />
+            <path d="M28 48H34" stroke="#db2777" stroke-width="2" />
+            <path d="M66 48H72" stroke="#db2777" stroke-width="2" />
+
+            <!-- Eyes inside glasses (blinking) -->
+            <g class="animate-blink-eyes">
+              <path d="M37 49C37 49 38.5 47 40 47C41.5 47 43 49 43 49" stroke="#475569" stroke-width="2" stroke-linecap="round" />
+              <path d="M57 49C57 49 58.5 47 60 47C61.5 47 63 49 63 49" stroke="#475569" stroke-width="2" stroke-linecap="round" />
+            </g>
+
+            <!-- Blush Cheeks -->
+            <circle cx="34" cy="54" r="2.5" fill="#fecdd3" />
+            <circle cx="66" cy="54" r="2.5" fill="#fecdd3" />
+
+            <!-- Smiling Mouth -->
+            <path d="M47 56C47 56 48.5 59 50 59C51.5 59 53 56 53 56" stroke="#e11d48" stroke-width="1.5" stroke-linecap="round" />
+
+            <!-- Body / Clothes -->
+            <path d="M36 70C36 70 38 65 50 65C62 65 64 70 64 70L60 88H40L36 70Z" fill="#4f46e5" />
+            <path d="M45 65L50 71L55 65" fill="#ffffff" />
+            <path d="M48 72L50 74L52 72" fill="#ec4899" />
+
+            <!-- Left hand holding book -->
+            <g>
+              <circle cx="34" cy="74" r="4" fill="#fed7aa" />
+              <rect x="24" y="70" width="8" height="12" rx="1" fill="#10b981" />
+              <rect x="25" y="72" width="6" height="1" fill="#ffffff" />
+              <rect x="25" y="75" width="6" height="1" fill="#ffffff" />
+              <rect x="25" y="78" width="4" height="1" fill="#ffffff" />
+            </g>
+
+            <!-- Right arm waving -->
+            <g class="animate-wave-hand origin-[64px_70px]">
+              <path d="M64 70C66 66 74 61 77 64C80 67 76 73 72 75" fill="#4f46e5" />
+              <circle cx="77" cy="62" r="4.5" fill="#fed7aa" />
+              <path d="M81 57C82 59 82 61 81 63" stroke="#fed7aa" stroke-width="1" stroke-linecap="round" />
+              <path d="M84 59C85 61 85 63 84 65" stroke="#fed7aa" stroke-width="1" stroke-linecap="round" />
+            </g>
+          </svg>
+        </button>
+      </div>
+
+      <!-- BUTTON TO RESTORE CO HIEN COMPANION WHEN MINIMIZED -->
+      <button id="co-hien-restore-btn" onclick="window.toggleCompanion(true)" class="hidden fixed bottom-6 right-6 z-50 px-4 py-2.5 bg-gradient-to-r from-pink-500 to-brand-600 text-white rounded-full shadow-2xl hover:scale-110 active:scale-95 transition-all duration-200 flex items-center justify-center gap-2 font-black text-xs border border-white/20 pointer-events-auto">
+        <span class="flex h-2 w-2 relative">
+          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-pink-300 opacity-75"></span>
+          <span class="relative inline-flex rounded-full h-2 w-2 bg-pink-100"></span>
+        </span>
+        <i data-lucide="message-circle" class="w-4 h-4"></i>
+        Hỏi Cô Hiền ✨
+      </button>
     </div>
 
     <!-- ==================== 5. CÁC MODALS POPUP TƯƠNG TÁC ==================== -->

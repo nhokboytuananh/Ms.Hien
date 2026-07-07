@@ -335,7 +335,7 @@ async function initDashboard() {
     // Load thư viện kịch bản cho Giáo Viên dán lên Window
     import(`./teacher.js?t=${Date.now()}`).then((module) => {
       // Đăng ký sự kiện click tab
-      setupTabListeners("teacher-nav", "view-t-classes");
+      setupTabListeners("teacher-nav", "view-t-home");
     });
   } else {
     roleBadge.textContent = `Học Sinh • Lớp ${user.class_name}`;
@@ -352,7 +352,7 @@ async function initDashboard() {
     // Load thư viện kịch bản cho Học Sinh dán lên Window
     import(`./student.js?t=${Date.now()}`).then((module) => {
       // Đăng ký sự kiện click tab học sinh
-      setupTabListeners("student-nav", "view-s-exams");
+      setupTabListeners("student-nav", "view-s-home");
     });
   }
 
@@ -399,6 +399,11 @@ function setupTabListeners(navContainerId, defaultTabId) {
 
         // Gọi hàm tự động load dữ liệu đặc thù của Tab đó nếu có
         triggerTabLoadData(tabName);
+
+        // Cô Hiền nhận xét tương ứng với tab được click
+        if (typeof window.triggerCompanionTabComment === "function") {
+          window.triggerCompanionTabComment(tabName);
+        }
       }
     });
   });
@@ -644,5 +649,133 @@ window.closeLeaderboardModal = () => {
   if (modal) {
     modal.classList.add("hidden");
     modal.classList.remove("flex");
+  }
+};
+
+// ==================== CO HIEN INTERACTIVE COMPANION LOGIC ====================
+const companionQuotes = {
+  "t-home": [
+    "Chào mừng cô đến với phòng làm việc thông minh Ms. Hiền!",
+    "Chúc cô giáo một ngày giảng dạy tràn đầy năng lượng và niềm vui!",
+    "Hôm nay cô định cho học sinh luyện đề thi hay học thêm từ vựng mới ạ?",
+    "Trợ lý AI của cô luôn sẵn sàng hỗ trợ soạn giáo án và biên tập câu hỏi nhé!"
+  ],
+  "t-classes": [
+    "Hãy xem danh sách lớp và tình hình làm bài của các học viên để động viên kịp thời cô nhé!",
+    "Một lời khen tặng đúng lúc sẽ tiếp thêm động lực vô cùng lớn cho học sinh đấy ạ!",
+    "Bảng theo dõi điểm số chi tiết sẽ giúp cô nắm chắc học lực của từng em."
+  ],
+  "t-vocab": [
+    "Kho từ vựng phong phú là bệ phóng hoàn hảo cho cả 4 kỹ năng tiếng Anh!",
+    "Cô có thể tải file Excel lên để nhập nhanh hàng trăm từ vựng trong nháy mắt.",
+    "Từ vựng được phân loại theo từng lớp học để học sinh dễ dàng tra cứu."
+  ],
+  "t-exams": [
+    "Soạn đề thi trắc nghiệm bằng AI siêu tốc chỉ trong vòng 15 giây!",
+    "Cô nhớ đính kèm file đề bài PDF hoặc link Drive để học sinh tiện xem nhé.",
+    "Ngân hàng câu hỏi thông minh giúp cô lưu trữ và tái sử dụng đề thi dễ dàng."
+  ],
+  "t-qna": [
+    "Các học sinh đang gửi nhiều thắc mắc cần cô giải đáp kìa, cùng xem thôi!",
+    "Giải đáp kịp thời giúp các em gỡ rối kiến thức ngay lập tức đấy cô ơi.",
+    "Cộng đồng hỏi đáp kết nối cô trò khăng khít hơn bao giờ hết."
+  ],
+  "t-materials": [
+    "Đăng tải tài liệu học tập, giáo án ôn thi bám sát chương trình học tại đây cô nhé.",
+    "Học sinh sẽ nhận được thông báo tải tài liệu ngay khi cô ấn nút Giao.",
+    "Chia sẻ tài liệu hay giúp các em học tập chủ động và hiệu quả hơn!"
+  ],
+  "s-home": [
+    "Chào em yêu quý! Hãy cùng cô bứt phá tiếng Anh điểm tuyệt đối nhé!",
+    "Học tiếng Anh mỗi ngày là thói quen tuyệt vời giúp em đi xa hơn.",
+    "Hôm nay em muốn luyện thi trắc nghiệm hay ôn tập từ vựng thế?",
+    "Hãy đặt mục tiêu chinh phục IELTS 7.5+ và tự tin theo đuổi ước mơ nha!"
+  ],
+  "s-exams": [
+    "Luyện đề trắc nghiệm có đếm ngược thời gian giúp em làm quen với áp lực phòng thi thật đấy!",
+    "Đừng lo lắng nếu làm sai, AI sẽ giải thích cực kỳ chi tiết cho em sau khi nộp bài.",
+    "Kiên trì luyện tập mỗi ngày, điểm số của em chắc chắn sẽ tăng vọt!"
+  ],
+  "s-vocab": [
+    "Flashcard lật thông minh là bí kíp ghim từ vựng trực quan cực kỳ nhớ lâu đấy!",
+    "Hãy thử sức với game gõ từ vựng nhanh để xem em đạt bao nhiêu điểm nhé!",
+    "Thuộc nhiều từ vựng giúp em đọc hiểu Listening & Reading dễ dàng như ăn kẹo."
+  ],
+  "s-chat": [
+    "Hỏi đáp AI hỗ trợ giải nghĩa từ vựng và cấu trúc ngữ pháp 24/7 tức thì!",
+    "Em có bài tập khó nào không? Cứ gửi vào đây cô và AI trợ lý sẽ giải đáp ngay.",
+    "Đừng ngại ngần đặt câu hỏi, học hỏi từ những thắc mắc là cách tiến bộ nhanh nhất!"
+  ],
+  "s-materials": [
+    "Tải xuống các tài liệu học tập và đề cương ôn thi Cô Hiền gửi riêng cho lớp của em nè.",
+    "Nhớ đọc kỹ tài liệu cô giao để nắm chắc lý thuyết trước khi bước vào phòng thi nha!",
+    "Lưu trữ tài liệu học tập khoa học sẽ giúp em dễ dàng ôn tập khi kỳ thi đến."
+  ],
+  "general": [
+    "Believing in yourself is the first secret of success! ✨ Cố gắng lên em nhé!",
+    "Practice makes perfect! Hãy kiên trì luyện tập tiếng Anh mỗi ngày nha.",
+    "No pain, no gain! Những nỗ lực hôm nay của em sẽ gặt hái quả ngọt mai sau.",
+    "Cô Hiền luôn tin tưởng vào khả năng bứt phá của các em!",
+    "IELTS Fighter - Tiếng Anh đột phá, làm chủ tương lai! 💪"
+  ]
+};
+
+let lastActiveTab = "s-home";
+
+window.triggerCompanionTabComment = (tabName) => {
+  lastActiveTab = tabName;
+  const quotes = companionQuotes[tabName] || companionQuotes["general"];
+  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+  updateCompanionSpeech(randomQuote);
+};
+
+window.speakCompanion = () => {
+  const tabQuotes = companionQuotes[lastActiveTab] || [];
+  const generalQuotes = companionQuotes["general"];
+  const allAvailable = [...tabQuotes, ...generalQuotes];
+  const randomQuote = allAvailable[Math.floor(Math.random() * allAvailable.length)];
+  updateCompanionSpeech(randomQuote);
+  
+  // Trực quan hiệu ứng âm thanh/nháy vòng tròn của Cô Hiền
+  const waveRing = document.getElementById("co-hien-wave-ring");
+  if (waveRing) {
+    waveRing.classList.remove("scale-100", "opacity-0");
+    waveRing.classList.add("scale-150", "opacity-100", "animate-ping");
+    setTimeout(() => {
+      waveRing.classList.remove("scale-150", "opacity-100", "animate-ping");
+      waveRing.classList.add("scale-100", "opacity-0");
+    }, 1000);
+  }
+};
+
+function updateCompanionSpeech(text) {
+  const speechTextEl = document.getElementById("co-hien-speech-text");
+  const bubbleEl = document.getElementById("co-hien-bubble");
+  
+  if (speechTextEl && bubbleEl) {
+    // Thêm hiệu ứng lắc nhẹ và hiện chữ sinh động
+    bubbleEl.classList.remove("scale-100");
+    bubbleEl.classList.add("scale-105", "border-pink-500/50");
+    
+    speechTextEl.textContent = text;
+    
+    setTimeout(() => {
+      bubbleEl.classList.remove("scale-105", "border-pink-500/50");
+      bubbleEl.classList.add("scale-100");
+    }, 300);
+  }
+}
+
+window.toggleCompanion = (show) => {
+  const companion = document.getElementById("co-hien-companion");
+  const restoreBtn = document.getElementById("co-hien-restore-btn");
+  if (companion && restoreBtn) {
+    if (show) {
+      companion.classList.remove("hidden");
+      restoreBtn.classList.add("hidden");
+    } else {
+      companion.classList.add("hidden");
+      restoreBtn.classList.remove("hidden");
+    }
   }
 };
